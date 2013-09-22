@@ -1,0 +1,14 @@
+<launch>
+
+  <!--<node pkg="image_proc" name="improc" type="image_proc" ns="PTZ"/>-->
+  <group ns="buzzmobile">
+    <node pkg="PhidgetMotor" name="PhidgetMotor" type="PhidgetMotor.py">
+        <param name="serial_no" value="307175"/>
+    </node>
+    <node pkg="phidget_linear_actuator" name="PhidgetLinear" type="PhidgetLinear.py">
+        <param name="serial_no" value="299642"/>
+        <param name="invert_speed" value="true"/>
+    </node>
+  </group>
+
+</launch>
