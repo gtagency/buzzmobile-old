@@ -2,6 +2,9 @@
 
   <!--<node pkg="image_proc" name="improc" type="image_proc" ns="PTZ"/>-->
   <group ns="buzzmobile">
+    <node pkg="nmea_gps_driver" name="nmea_gps_driver" type="nmea_gps_driver.py>
+        <param name="dev" value="/dev/serial/by-id/usb-DeLorme_Publishing_DeLorme_USB_Earthmate-if00-port0" />
+    </node>
     <node pkg="joy" name="joy_node" type="joy_node">
         <param name="dev" value="/dev/input/js1" />
     </node>
