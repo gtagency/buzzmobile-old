@@ -1,0 +1,110 @@
+<launch>
+
+  <!-- All nodes required for the buzzmobile self driving car. -->
+  <group ns="buzzmobile">
+
+    <!-- Navigation, planning, execution -->
+    <!-- Navigator - find a route through a road network
+         Input:  Road network from file, /fix, /destination
+         Output: /current_waypoint, /next_waypoint
+         Status: IN DEVELOPMENT
+    -->
+
+    <!-- Planner - plan a safe path through the obstacles, towards the next waypoint
+         Input:  /lanes, /obstacles, /odom
+         Output: /plan
+         Status: IN DEVELOPMENT
+    -->
+
+    <!-- Driver - execute a plan by issuing commands to the physical actuators
+         Input:  /plan
+         Output: /PhidgetMotor, PhidgetLinear
+         Status: Not Started
+    -->
+
+    <!-- Feature Extraction and Model Building -->
+    
+    <!-- Lane Detection
+         Input:  /image_color, /odom
+         Output: /lanes, /obstacles
+         Status: IN DEVELOPMENT
+    -->
+    <node pkg="lane_detect" name="lane_detect" type="lane_detect" />
+
+    <!-- Obstacle Tracking
+         Input:  <laser>, /image_mono
+         Output: /obstacles
+    -->
+
+    <!-- Sensors -->
+    <!-- IMU
+         Input:  Raw input from sensors
+         Output: /odom
+         Status: IN DEVELOPMENT
+    -->
+    <node pkg="android_sensors" name="android_sensors" type="android_sensors" />
+
+    <!-- GPS - Interface with Earthmate LT-20 GPS
+         Input:  Raw input from GPS
+         Output: /fix, /time_reference, /vel
+         Status: Tested
+     -->
+    <node pkg="nmea_gps_driver" name="nmea_gps_driver" type="nmea_gps_driver.py>
+        <param name="dev" value="/dev/serial/by-id/usb-DeLorme_Publishing_DeLorme_USB_Earthmate-if00-port0" />
+    </node>
+
+    <!-- Camera
+         Input:  Raw input from USB camera
+         Output: /image_raw, /camera_info
+         Status: UNKNOWN
+    -->
+    <node pkg="usb_cam" name="usb_cam" type="usb_cam">
+        <param name="device" value="/dev/video1" />
+    </node>
+    <node pkg="image_proc" name="improc" type="image_proc" ns="buzzmobile"/>
+
+    <!-- Hokuyo LIDAR
+         Input: Raw input from LIDAR
+         Output: UNKNOWN
+         Status: UNKNOWN
+    -->
+
+    <!-- Physical control -->
+    <!-- Wheel motor - control of the back wheels
+         Input:  /PhidgetMotor
+         Output: Raw output to motor controller
+         Status: Tested
+     -->
+    <node pkg="PhidgetMotor" name="PhidgetMotor" type="PhidgetMotor.py">
+        <param name="serial_no" value="307175"/>
+    </node>
+    <!-- Steering control - Steering control of front wheels
+         Input:  /PhidgetLinear
+         Output: Raw output to motor controller
+         Status: Tested
+     -->
+    <node pkg="phidget_linear_actuator" name="PhidgetLinear" type="PhidgetLinear.py">
+        <param name="serial_no" value="299642"/>
+        <param name="invert_speed" value="true"/>
+    </node>
+
+
+    <!-- Teleoperation (used in support of autonomous driver) -->
+    <!-- Joy - interface with the joystick.
+         Input:  Raw input from device
+         Output: /joy
+         Status: 3rd Party
+    -->
+    <node pkg="joy" name="joy_node" type="joy_node">
+        <param name="dev" value="/dev/input/js1" />
+    </node>
+    <!-- Joystick teleoperation - maps /joy input to commands/direction to the car
+         Input:  /Joy
+         Output: /PhidgetMotor, /PhidgetLinear
+         Status: Tested
+    -->
+    <node pkg="teleop_joy" name="teleop_joy" type="teleop_joy_node" />
+        
+  </group>
+
+</launch>
