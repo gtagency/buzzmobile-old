@@ -28,12 +28,9 @@ class Navigator(object):
         self.destLat = rospy.get_param("~destination_lat", None)
         self.destLon = rospy.get_param("~destination_lon", None)
         rospy.loginfo("Initial target: %f, %f" % (self.destLat, self.destLon))
-        if self.destLat and self.destLon:
-            print "wang"
-            rospy.loginfo("Initial destination specified, routing right away")
-            self.reroute()
-        else:
-            self.route = []
+        # NOTE: don't route right away, because we don't have a lat/long yet.  we'll
+        # route once we get an update from the gps
+        self.route = []
         self.curWaypoint = None
 
     def nearCurrentWaypoint(self):
@@ -44,6 +41,7 @@ class Navigator(object):
         # TODO Need to figure out how to compute error better, for nearCurrentWaypoint
         errorInMeters = math.sqrt(self.covariance[0])
         dist = euclidean(self.curWaypoint.latitude, self.curWaypoint.longitude, self.latitude, self.longitude) * 69 * 1.6 * 1000
+        rospy.loginfo("Error: %f, Dist: %f" % (errorInMeters, dist))
         return dist < errorInMeters
 
     def reroute(self):
@@ -61,7 +59,7 @@ class Navigator(object):
     def fixUpdated(self, data):
         self.latitude = data.latitude
         self.longitude = data.longitude
-        self.covariance = data.position_covariance #3x3 matrix in a 9 element array
+        self.covariance = list(data.position_covariance) #3x3 matrix in a 9 element array
         rospy.loginfo("Updated position: %f, %f" % (self.latitude, self.longitude))
         if self.curWaypoint:
             self.updateAlongRoute(self.nearCurrentWaypoint())
