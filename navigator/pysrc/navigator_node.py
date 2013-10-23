@@ -25,7 +25,13 @@ class Navigator(object):
         self.route = []
 
     def nearCurrentWaypoint(self):
-        return self.route #True # TODO
+        # test if we're within the error bounds of the waypoint..if so, we're 'near' it
+        # SUPER CHEAT because I know the GPS data is coming from a phone, and therefore
+        # I don't really have a full covariance matrix.  This pulls out the 68% accurac
+        # computed by the phone, which is 1 std dev from the estimated position
+        # TODO Need to figure out how to compute error better, for nearCurrentWaypoint
+        errorInMeters = sqrt(self.covariance[0])
+        return euclidean(self.curWaypoint.latitude, self.curWaypoint.longitude, self.latitude, self.longitude) < errorInMeters
 
     def reroute(self, destLat, destLon):
         if self.latitude != inf and self.longitude != inf:
@@ -40,6 +46,7 @@ class Navigator(object):
     def fixUpdated(self, data):
         self.latitude = data.latitude
         self.longitude = data.longitude
+        self.covariance = data.covariance #3x3 matrix in a 9 element array
         rospy.loginfo("Updated position: %f, %f" % (self.latitude, self.longitude))
         self.updateAlongRoute(self.nearCurrentWaypoint())
 
