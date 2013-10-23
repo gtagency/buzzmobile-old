@@ -5,10 +5,13 @@
 
     <!-- Navigation, planning, execution -->
     <!-- Navigator - find a route through a road network
-         Input:  Road network from file, /fix, /destination
-         Output: /current_waypoint, /next_waypoint
-         Status: IN DEVELOPMENT
+         Input:  Road network from file, /fix
+         Output: /current_waypoint
+         Service: /setDestination
+         Status: Tested
     -->
+
+    <node pkg="navigator" name="navigator" type="navigator_node.py />
 
     <!-- Planner - plan a safe path through the obstacles, towards the next waypoint
          Input:  /lanes, /obstacles, /odom
