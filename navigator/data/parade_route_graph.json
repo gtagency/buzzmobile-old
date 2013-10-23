@@ -1,59 +1,33 @@
-
-{"_comment" : "List of waypoints"
-# Lat/Long pulled from http://itouchmap.com/latlong.html
-points
-# 1) 10th and Fowler
-33.781511,-84.39357
-
-# 2) Fowler and ??
-33.779575,-84.393604
-
-# 3) Fowler and ??
-33.778425,-84.39362
-
-# 4) Fowler and 6th
-33.778175,-84.39362
-
-# 5) Fowler and ??
-33.777413,-84.393631
-
-# 6) Fowler and 5th
-33.776909,-84.393641
-
-# 7) 5th and Ferst (not an intersection)
-33.776998,-84.395283
-
-# 8) Ferst and ??
-33.777649,-84.395771
-
-# 9) Ferst and ??
-33.778157,-84.396468
-
-# 10) Ferst and Atlantic
-33.778251,-84.397799
-end_points
-
-edges
-# Edge List
-# Forward
-1,2
-2,3
-3,4
-4,5
-5,6
-6,7
-7,8
-8,9
-9,10
-
-# Reverse
-2,1
-3,2
-4,3
-5,4
-6,5
-7,6
-8,7
-9,8
-10,9
-end_edges
+{"_comment" : "List of waypoints, Lat/Long pulled from http://itouchmap.com/latlong.html",
+"points" :
+[{"_comment" : "# 1) 10th and Fowler",     "location" : "33.781511,-84.39357"},
+ {"_comment" : "# 2) Fowler and ??",       "location" : "33.779575,-84.393604"},
+ {"_comment" : "# 3) Fowler and ??",       "location" : "33.778425,-84.39362"},
+ {"_comment" : "# 4) Fowler and 6th",      "location" : "33.778175,-84.39362"},
+ {"_comment" : "# 5) Fowler and ??",       "location" : "33.777413,-84.393631"},
+ {"_comment" : "# 6) Fowler and 5th",      "location" : "33.776909,-84.393641"},
+ {"_comment" : "# 7) 5th and Ferst (not an intersection)",
+                                           "location" : "33.776998,-84.395283"},
+ {"_comment" : "# 8) Ferst and ??",        "location" : "33.777649,-84.395771"},
+ {"_comment" : "# 9) Ferst and ??",        "location" : "33.778157,-84.396468"},
+ {"_comment" : "# 10) Ferst and Atlantic", "location" : "33.778251,-84.397799"}],
+"edges" : {"_comment" : "# Edge List", "forward" :
+[{"start" : 1, "end" : 2},
+ {"start" : 2, "end" : 3},
+ {"start" : 3, "end" : 4},
+ {"start" : 4, "end" : 5},
+ {"start" : 5, "end" : 6},
+ {"start" : 6, "end" : 7},
+ {"start" : 7, "end" : 8},
+ {"start" : 8, "end" : 9},
+ {"start" : 9, "end" : 10}],
+"reverse" : 
+[{"start" : 2, "end" : 1},
+ {"start" : 3, "end" : 2},
+ {"start" : 4, "end" : 3},
+ {"start" : 5, "end" : 4},
+ {"start" : 6, "end" : 5},
+ {"start" : 7, "end" : 6},
+ {"start" : 8, "end" : 7},
+ {"start" : 9, "end" : 8},
+ {"start" : 10, "end" : 9}]}}
