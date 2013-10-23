@@ -7,6 +7,8 @@ from sensor_msgs.msg import NavSatFix
 from road_network import *
 from navigator.srv import *
 
+import math
+
 inf = float("inf")
 
 class Navigator(object):
@@ -16,13 +18,23 @@ class Navigator(object):
         rospy.init_node('navigator_node')
 
         self.roadNetwork = RoadNetwork(networkFileName)
-        self.curWaypointPub = rospy.Publisher("current_waypoint", Point)
+        self.curWaypointPub = rospy.Publisher("current_waypoint", Point, latch=True)
         rospy.Subscriber("fix", NavSatFix, self.fixUpdated)
         rospy.Service("setDestination", Destination, self.setDestination)
 
         self.latitude = inf
         self.longitude = inf
-        self.route = []
+        
+        self.destLat = rospy.get_param("~destination_lat", None)
+        self.destLon = rospy.get_param("~destination_lon", None)
+        rospy.loginfo("Initial target: %f, %f" % (self.destLat, self.destLon))
+        if self.destLat and self.destLon:
+            print "wang"
+            rospy.loginfo("Initial destination specified, routing right away")
+            self.reroute()
+        else:
+            self.route = []
+        self.curWaypoint = None
 
     def nearCurrentWaypoint(self):
         # test if we're within the error bounds of the waypoint..if so, we're 'near' it
@@ -30,28 +42,34 @@ class Navigator(object):
         # I don't really have a full covariance matrix.  This pulls out the 68% accurac
         # computed by the phone, which is 1 std dev from the estimated position
         # TODO Need to figure out how to compute error better, for nearCurrentWaypoint
-        errorInMeters = sqrt(self.covariance[0])
-        return euclidean(self.curWaypoint.latitude, self.curWaypoint.longitude, self.latitude, self.longitude) < errorInMeters
+        errorInMeters = math.sqrt(self.covariance[0])
+        dist = euclidean(self.curWaypoint.latitude, self.curWaypoint.longitude, self.latitude, self.longitude) * 69 * 1.6 * 1000
+        return dist < errorInMeters
 
-    def reroute(self, destLat, destLon):
+    def reroute(self):
         if self.latitude != inf and self.longitude != inf:
-            self.route = self.roadNetwork.findPathFromPosition(self.latitude, self.longitude, destLat, destLon)
+            self.route = self.roadNetwork.findPathFromPosition(self.latitude, self.longitude, self.destLat, self.destLon)
             self.updateAlongRoute(True)
         else: 
             rospy.loginfo("No Nav fix received, cannot route to destination")
             
     def setDestination(self, req):
-        self.reroute(req.destination.x, req.destination.y)
+        self.destLat = req.destination.x
+        self.destLon = req.destination.y
+        self.reroute()
 
     def fixUpdated(self, data):
         self.latitude = data.latitude
         self.longitude = data.longitude
-        self.covariance = data.covariance #3x3 matrix in a 9 element array
+        self.covariance = data.position_covariance #3x3 matrix in a 9 element array
         rospy.loginfo("Updated position: %f, %f" % (self.latitude, self.longitude))
-        self.updateAlongRoute(self.nearCurrentWaypoint())
+        if self.curWaypoint:
+            self.updateAlongRoute(self.nearCurrentWaypoint())
+        elif self.destLat and self.destLon:
+            self.reroute()
 
     def updateAlongRoute(self, pushNext):
-        if pushNext:
+        if self.route and pushNext:
             print "About to publish update message"
             self.curWaypoint = self.route.pop(0)
             msg = Point()

@@ -1,0 +1,15 @@
+<launch>
+
+    <node pkg="navigator" type="navigator_node.py" name="navigator">
+        <param name="destination_lat" value="33.778251" />
+        <param name="destination_lon" value="-84.397779" />
+    </node>
+    <node pkg="testing" type="gps_sim.py" name="gps_sim">
+        <param name="startLat" value="33.78151"/>
+        <param name="startLon" value="-84.39357"/>
+        <param name="velocity" value="5"/>
+        <param name="updateRateMS" value="500"/>
+        <param name="startImmediately" value="true"/>
+        <remap from="moveTowards" to="current_waypoint" />
+    </node>
+</launch>
