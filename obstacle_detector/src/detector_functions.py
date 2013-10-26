@@ -1,5 +1,6 @@
 """Provides functions for use in the obstacle detection node."""
 
+
 def polar2cart(coords):
     """
     Convert list of polar coordinates to cartesian.
@@ -9,9 +10,12 @@ def polar2cart(coords):
     """
     pass
 
+
 def _ccw(p1, p2, p3):
     """
     Return direction of vector P1P2 X P1P3.
+
+    Helper function for graham_scan.
 
     Args:
     p1,p2,p3 -- 2D points represented as tuples (x,y)
@@ -30,7 +34,7 @@ def graham_scan(points):
     lower_hull = []
     points = sorted(points)
     for p in points:
-        while len(upper_hull) > 1 and _ccw(upper_hull[-2], upper_hull[-1], p) <= 0:
+        while len(upper_hull)> 1 and _ccw(upper_hull[-2], upper_hull[-1], p) <= 0:
             upper_hull.pop()
         while len(lower_hull) > 1 and _ccw(lower_hull[-2], lower_hull[-1], p) >= 0:
             lower_hull.pop()
