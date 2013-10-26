@@ -8,8 +8,8 @@ class Detector(object):
     def __init__(self):
         self.obstacles = []
         rospy.init_node("detector")
-        obstacles_pub = rospy.Publisher("obstacles", ObstacleArrayStamped)
-        rospy.Subsciber("scan", LaserScan, self.update_obstacles)
+        self.obstacles_pub = rospy.Publisher("obstacles", ObstacleArrayStamped)
+        rospy.Subscriber("scan", LaserScan, self.update_obstacles)
 
     def update_obstacles(self, scan):        
         pass
@@ -17,7 +17,7 @@ class Detector(object):
     def run(self):
         r = rospy.Rate(25)
         while not rospy.is_shutdown():
-            self.pub.publish(self.obstacles)
+            self.obstacles_pub.publish(self.obstacles)
             r.sleep()
     
 
