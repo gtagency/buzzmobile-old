@@ -8,6 +8,22 @@ from itertools import product
 GROUPING_DISTANCE = 1
 
 
+def clean_scan(angle_min, angle_inc,
+	       rmin, rmax, ranges):
+    """
+    Return laser scan in in form [(rho,phi),...]
+    Throws out any ranges too close/far.
+
+    Args:
+    angle_min -- Minumum angle of scan(seems to be -pi/2 for Hokuyo).
+    angle_inc -- Change in angle between ranges(seems to be pi/720 for Hokuyo).
+    rmin -- Minimum range(ranges less than this should be discarded).
+    rmax -- Maximum range(ranges greater than this should be discarded).
+    ranges -- Iterable of numbers representing ranges.
+    """
+    return [(rho, angle_min + angle_inc*i) for i,rho in enumerate(ranges) if rmin < rho < rmax]
+
+
 def polar2cart(coords):
     """
     Convert list of polar coordinates to cartesian.
