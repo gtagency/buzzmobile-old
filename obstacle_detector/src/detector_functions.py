@@ -3,9 +3,13 @@
 from math import cos, sin, sqrt
 from itertools import product
 
+import networkx as nx
+
 # Largest distance between directly connected points.
 # Further points may still be grouped if a path exists between them.
 GROUPING_DISTANCE = 1
+# Minimum number of points needed to be a group.
+MIN_GROUP_SIZE = 5
 
 
 def clean_scan(angle_min, angle_inc,
@@ -78,7 +82,7 @@ def _grouping_metric(p1, p2):
     return sqrt((p2[0]-p1[0])**2 + (p2[1]-p1[1])**2)
 
 #TODO find a better way or implement this to be faster.
-def get_edges(points):
+def _get_edges(points):
     """
     Return list of point pairs whose distance is within the grouping threshold.
 
@@ -89,3 +93,10 @@ def get_edges(points):
     pairs = product(points, repeat=2)
     edges = [(a,b) for a,b in pairs if d(a,b) <= GROUPING_DISTANCE]
     return edges
+
+def group_points(points):
+    g = nx.Graph()
+    g.add_edges_from(_get_edges(points))
+    groups = nx.connected_components(g)
+    groups = [group for group in groups if len(group) >= MIN_GROUP_SIZE]
+    return groups
