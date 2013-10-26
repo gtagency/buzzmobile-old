@@ -1,5 +1,7 @@
 """Provides functions for use in the obstacle detection node."""
 
+from math import cos,sin
+
 
 def polar2cart(coords):
     """
@@ -8,7 +10,7 @@ def polar2cart(coords):
     Args:
     coords -- iterable of polar points in form [(rho,phi),...]
     """
-    pass
+    return [(rho*cos(phi), rho*sin(phi)) for rho,phi in coords]
 
 
 def _ccw(p1, p2, p3):
@@ -34,7 +36,7 @@ def graham_scan(points):
     lower_hull = []
     points = sorted(points)
     for p in points:
-        while len(upper_hull)> 1 and _ccw(upper_hull[-2], upper_hull[-1], p) <= 0:
+        while len(upper_hull) > 1 and _ccw(upper_hull[-2], upper_hull[-1], p) <= 0:
             upper_hull.pop()
         while len(lower_hull) > 1 and _ccw(lower_hull[-2], lower_hull[-1], p) >= 0:
             lower_hull.pop()
