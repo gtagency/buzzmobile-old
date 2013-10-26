@@ -1,6 +1,10 @@
 """Provides functions for use in the obstacle detection node."""
 
 from math import cos,sin
+from itertools import product
+
+
+GROUPING_DISTANCE = 1
 
 
 def polar2cart(coords):
@@ -43,5 +47,14 @@ def graham_scan(points):
         upper_hull.append(p)
         lower_hull.append(p)
     return upper_hull + lower_hull[-2:0:-1]
-        
-        
+
+
+def _grouping_metric(p1, p2):
+    return (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2
+
+
+def get_edges(points):
+    d = _grouping_metric
+    pairs = product(points, repeat=2)
+    edges = [(a,b) for a,b in pairs if d(a,b) <= GROUPING_DISTANCE]
+    return edges
