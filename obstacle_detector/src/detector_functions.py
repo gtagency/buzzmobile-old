@@ -1,9 +1,10 @@
 """Provides functions for use in the obstacle detection node."""
 
-from math import cos,sin
+from math import cos, sin, sqrt
 from itertools import product
 
-
+# Largest distance between directly connected points.
+# Further points may still be grouped if a path exists between them.
 GROUPING_DISTANCE = 1
 
 
@@ -50,10 +51,24 @@ def graham_scan(points):
 
 
 def _grouping_metric(p1, p2):
-    return (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2
+    """
+    Return distance between two points.
 
+    Calculates distance using Euclidean metric.
+    
+    Args:
+    p1, p2 -- 2D points represented as tuples (x,y)
+    """
+    return sqrt((p2[0]-p1[0])**2 + (p2[1]-p1[1])**2)
 
+#TODO find a better way or implement this to be faster.
 def get_edges(points):
+    """
+    Return list of point pairs whose distance is within the grouping threshold.
+
+    Args:
+    points -- iterable of 2D points in form [(x,y),...]
+    """
     d = _grouping_metric
     pairs = product(points, repeat=2)
     edges = [(a,b) for a,b in pairs if d(a,b) <= GROUPING_DISTANCE]
