@@ -81,7 +81,7 @@ def _grouping_metric(p1, p2):
     """
     return sqrt((p2[0]-p1[0])**2 + (p2[1]-p1[1])**2)
 
-#TODO find a better way or implement this to be faster.
+#TODO find a better way or implement this to be faster. ctypes?
 def _get_edges(points):
     """
     Return list of point pairs whose distance is within the grouping threshold.
@@ -95,6 +95,16 @@ def _get_edges(points):
     return edges
 
 def group_points(points):
+    """
+    Return list of groups of points in form [[(x,y),...],[(x,y),...],...].
+
+    Points are grouped by connecting all points within GROUPING_DISTANCE
+    of each other. The groups are labeled using Networkx's connected component
+    function on the edge list.
+
+    Args:
+    points -- iterable of 2D points in form [(x,y),...]
+    """
     g = nx.Graph()
     g.add_edges_from(_get_edges(points))
     groups = nx.connected_components(g)
