@@ -10,8 +10,7 @@ import detector_functions as df
 
 class Detector(object):
     def __init__(self):
-        self.obstacles = []
-	self.stop_flag = False
+        self.stop_flag = False
         rospy.init_node("detector")
         self.obstacles_pub = rospy.Publisher("obstacle_stop", Bool)
         rospy.Subscriber("scan", LaserScan, self.update_obstacles)

@@ -1,5 +1,5 @@
 """Provides functions for use in the obstacle detection node."""
-
+import ctypes
 from math import cos, sin, sqrt
 from itertools import product
 
@@ -10,6 +10,15 @@ import networkx as nx
 GROUPING_DISTANCE = 1
 # Minimum number of points needed to be a group.
 MIN_GROUP_SIZE = 5
+
+DETECTOR_LIB = ctypes.CDLL("detector_node_lib.so")
+DETECTOR_LIB.get_edges.argtypes = [ctypes.POINTER(ctypes.c_double),
+                                   ctypes.POINTER(ctypes.c_double),
+                                   ctypes.POINTER(ctypes.c_double),
+                                   ctypes.POINTER(ctypes.c_double),
+                                   ctypes.POINTER(ctypes.c_double),
+                                   ctypes.POINTER(ctypes.c_double),
+                                   ctypes.c_int, ctypes.POINTER(ctypes.c_int)]
 
 
 def clean_scan(angle_min, angle_inc,
@@ -81,18 +90,31 @@ def _grouping_metric(p1, p2):
     """
     return sqrt((p2[0]-p1[0])**2 + (p2[1]-p1[1])**2)
 
-#TODO find a better way or implement this to be faster. ctypes?
-def _get_edges(points):
-    """
-    Return list of point pairs whose distance is within the grouping threshold.
 
-    Args:
-    points -- iterable of 2D points in form [(x,y),...]
-    """
-    d = _grouping_metric
-    pairs = product(points, repeat=2)
-    edges = [(a,b) for a,b in pairs if d(a,b) <= GROUPING_DISTANCE]
+def _get_edges(points):
+    length = int((len(points)*(len(points)-1))/2)
+    x,y = zip(*points)
+
+    xin = (ctypes.c_double * len(points))(*x)
+    yin = (ctypes.c_double * len(points))(*y)
+
+    x1out = (ctypes.c_double * length)()
+    y1out = (ctypes.c_double * length)()
+    x2out = (ctypes.c_double * length)()
+    y2out = (ctypes.c_double * length)()
+
+    INTP = ctypes.POINTER(ctypes.c_int)
+    ptr_num = ctypes.c_int(42)
+    ptr_addr = ctypes.addressof(ptr_num)
+    ptr = ctypes.cast(ptr_addr, INTP)
+
+    get_edges(xin, yin, x1out, y1out, x2out, y2out,
+              ctypes.c_int(len(points)), ptr)
+    num_edges = ptr[0]
+    edges = list(zip(((x1out[i],y1out[i]) for i in range(num)),
+                     ((x2out[i],y2out[i]) for i in range(num))))
     return edges
+    
 
 def group_points(points):
     """
