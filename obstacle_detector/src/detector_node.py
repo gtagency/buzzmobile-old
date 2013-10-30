@@ -10,8 +10,12 @@ import detector_functions as df
 
 class Detector(object):
     def __init__(self):
+<<<<<<< HEAD
         self.obstacles = []
 	self.stop_flag = False
+=======
+        self.stop_flag = False
+>>>>>>> parade-obstacle-node
         rospy.init_node("detector")
         self.obstacles_pub = rospy.Publisher("obstacle_stop", Bool)
         rospy.Subscriber("scan", LaserScan, self.update_obstacles)
@@ -20,6 +24,10 @@ class Detector(object):
 	points = df.clean_scan(scan.angle_min, scan.angle_increment,
 				  scan.range_min, scan.range_max, scan.ranges)
 	points = df.polar2cart(points)
+<<<<<<< HEAD
+=======
+        groups = df.group_points(points)
+>>>>>>> parade-obstacle-node
 
     def run(self):
         r = rospy.Rate(25)
