@@ -2,8 +2,7 @@
 import roslib
 import rospy
 from std_msgs.msg import Bool
-from geometry_msgs.msg import Point32
-from sensor_msgs.msg import LaserScan, PointCloud
+from sensor_msgs.msg import LaserScan
 
 import detector_functions as df
 
@@ -20,6 +19,11 @@ class Detector(object):
 				  scan.range_min, scan.range_max, scan.ranges)
 	points = df.polar2cart(points)
         groups = df.group_points(points)
+        #TODO Find get distance from laser to groups.
+        ## Faster, but still fairly slow even with c wrapper.
+        ## Possible solution is to only use every nth theta. Seems
+        ## to work quite well from testing will implement.
+        
 
     def run(self):
         r = rospy.Rate(25)
