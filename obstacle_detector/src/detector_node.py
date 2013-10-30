@@ -19,6 +19,7 @@ class Detector(object):
 	points = df.clean_scan(scan.angle_min, scan.angle_increment,
 				  scan.range_min, scan.range_max, scan.ranges)
 	points = df.polar2cart(points)
+        groups = df.group_points(points)
 
     def run(self):
         r = rospy.Rate(25)
