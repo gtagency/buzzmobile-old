@@ -20,6 +20,11 @@ DETECTOR_LIB.get_edges.argtypes = [ctypes.POINTER(ctypes.c_double),
                                    ctypes.c_int, ctypes.c_double,
                                    ctypes.POINTER(ctypes.c_int)]
 
+def closest_point(points):
+    if not points:
+	return float('inf')
+    return min(_grouping_metric(p,(0,0)) for p in points)
+	
 
 def clean_scan(angle_min, angle_inc,
 	       rmin, rmax, ranges, step=1):
@@ -113,8 +118,8 @@ def _get_edges(points):
               ctypes.c_int(len(points)),
               ctypes.c_double(GROUPING_DISTANCE), ptr)
     num_edges = ptr[0]
-    edges = list(zip(((x1out[i],y1out[i]) for i in range(num)),
-                     ((x2out[i],y2out[i]) for i in range(num))))
+    edges = list(zip(((x1out[i],y1out[i]) for i in range(num_edges)),
+                     ((x2out[i],y2out[i]) for i in range(num_edges))))
     return edges
     
 
