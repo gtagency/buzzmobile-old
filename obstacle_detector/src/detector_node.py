@@ -31,7 +31,7 @@ class Detector(object):
 	hulls = [df.graham_scan(g) for g in groups]
 	closest = df.closest_point([p for hull in hulls for p in hull])
 	
-	self.stop_flag = closest < 3
+	self.stop_flag = closest < MIN_DISTANCE
 
     def run(self):
         r = rospy.Rate(25)
