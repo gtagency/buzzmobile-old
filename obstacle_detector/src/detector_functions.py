@@ -35,7 +35,7 @@ def clean_scan(angle_min, angle_inc,
     ranges -- Iterable of numbers representing ranges.
     step -- Skips step angles each time. Defaults to one(no skips).
     """
-    return [(rho, angle_min + angle_inc*i) for i,rho in enumerate(ranges[::step]) if rmin < rho < rmax]
+    return [(ranges[i], angle_min + angle_inc*i) for i in range(0,len(ranges),step) if rmin < ranges[i] < rmax]
 
 
 def polar2cart(coords):
@@ -109,7 +109,7 @@ def _get_edges(points):
     ptr_addr = ctypes.addressof(ptr_num)
     ptr = ctypes.cast(ptr_addr, INTP)
 
-    get_edges(xin, yin, x1out, y1out, x2out, y2out,
+    DETECTOR_LIB.get_edges(xin, yin, x1out, y1out, x2out, y2out,
               ctypes.c_int(len(points)),
               ctypes.c_double(GROUPING_DISTANCE), ptr)
     num_edges = ptr[0]
