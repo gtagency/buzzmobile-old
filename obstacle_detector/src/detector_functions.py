@@ -1,6 +1,6 @@
 """Provides functions for use in the obstacle detection node."""
 import ctypes
-from math import cos, sin, sqrt
+from math import cos, sin, sqrt, pi
 
 import networkx as nx
 
@@ -9,6 +9,7 @@ import networkx as nx
 GROUPING_DISTANCE = 1
 # Minimum number of points needed to be a group.
 MIN_GROUP_SIZE = 5
+START_ANGLE, END_ANGLE = -pi/4, pi/4
 
 DETECTOR_LIB = ctypes.CDLL("detector_node_lib.so")
 DETECTOR_LIB.get_edges.argtypes = [ctypes.POINTER(ctypes.c_double),
@@ -26,7 +27,7 @@ def closest_point(points):
     return min(_grouping_metric(p,(0,0)) for p in points)
 	
 
-def clean_scan(angle_min, angle_inc,
+def clean_scan(angle_min, angle_max, angle_inc,
 	       rmin, rmax, ranges, step=1):
     """
     Return laser scan in in form [(rho,phi),...]
@@ -40,7 +41,9 @@ def clean_scan(angle_min, angle_inc,
     ranges -- Iterable of numbers representing ranges.
     step -- Skips step angles each time. Defaults to one(no skips).
     """
-    return [(ranges[i], angle_min + angle_inc*i) for i in range(0,len(ranges),step) if rmin < ranges[i] < rmax]
+    start = int(round(abs((angle_min-START_ANGLE)/angle_inc)))
+    end = len(ranges) - int(round(abs((angle_max-END_ANGLE)/angle_inc)))
+    return [(ranges[i], angle_min + angle_inc*i) for i in range(start,end,step) if rmin < ranges[i] < rmax]
 
 
 def polar2cart(coords):

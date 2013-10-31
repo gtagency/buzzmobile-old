@@ -23,9 +23,10 @@ class Detector(object):
         rospy.Subscriber("scan", LaserScan, self.update_obstacles)
 
     def update_obstacles(self, scan):        
-	points = df.clean_scan(scan.angle_min, scan.angle_increment,
-			        scan.range_min, scan.range_max,
-                                scan.ranges, RANGE_STEP)
+	points = df.clean_scan(scan.angle_min, scan.angle_max,
+                               scan.angle_increment,
+			       scan.range_min, scan.range_max,
+                               scan.ranges, RANGE_STEP)
 	points = df.polar2cart(points)
         groups = df.group_points(points)
 	hulls = [df.graham_scan(g) for g in groups]
