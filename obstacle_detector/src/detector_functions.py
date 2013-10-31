@@ -23,7 +23,7 @@ DETECTOR_LIB.get_edges.argtypes = [ctypes.POINTER(ctypes.c_double),
 
 
 def clean_scan(angle_min, angle_inc,
-	       rmin, rmax, ranges):
+	       rmin, rmax, ranges, step=1):
     """
     Return laser scan in in form [(rho,phi),...]
     Throws out any ranges too close/far.
@@ -34,8 +34,9 @@ def clean_scan(angle_min, angle_inc,
     rmin -- Minimum range(ranges less than this should be discarded).
     rmax -- Maximum range(ranges greater than this should be discarded).
     ranges -- Iterable of numbers representing ranges.
+    step -- Skips step angles each time. Defaults to one(no skips).
     """
-    return [(rho, angle_min + angle_inc*i) for i,rho in enumerate(ranges) if rmin < rho < rmax]
+    return [(rho, angle_min + angle_inc*i) for i,rho in enumerate(ranges)[::step] if rmin < rho < rmax]
 
 
 def polar2cart(coords):
