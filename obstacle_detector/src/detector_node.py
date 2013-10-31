@@ -1,35 +1,42 @@
 #!/usr/bin/env python
 import roslib
 import rospy
-from std_msgs.msg import Bool
-from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Bool, Header
+from geometry_msgs.msg import Point32, Polygon, PolygonStamped
+from sensor_msgs.msg import LaserScan, PointCloud
 
 import detector_functions as df
+
+df.GROUPING_DISTANCE = .1
+df.MIN_GROUP_SIZE = 5
+RANGE_STEP = 10
+# Obstacle distance threshold.
+MIN_DISTANCE = 3
+
 
 
 class Detector(object):
     def __init__(self):
         self.stop_flag = False
         rospy.init_node("detector")
-        self.obstacles_pub = rospy.Publisher("obstacle_stop", Bool)
+        self.obstacles_pub = rospy.Publisher("obstacle_flag", Bool)
         rospy.Subscriber("scan", LaserScan, self.update_obstacles)
 
     def update_obstacles(self, scan):        
 	points = df.clean_scan(scan.angle_min, scan.angle_increment,
-				  scan.range_min, scan.range_max, scan.ranges)
+			        scan.range_min, scan.range_max,
+                                scan.ranges, RANGE_STEP)
 	points = df.polar2cart(points)
         groups = df.group_points(points)
-        #TODO Find get distance from laser to groups.
-        ## Faster, but still fairly slow even with c wrapper.
-        ## Possible solution is to only use every nth theta. Seems
-        ## to work quite well from testing will implement.
-        
+	hulls = [df.graham_scan(g) for g in groups]
+	closest = df.closest_point([p for hull in hulls for p in hull])
+	
+	self.stop_flag = closest < 3
 
     def run(self):
         r = rospy.Rate(25)
         while not rospy.is_shutdown():
-	    if self.stop_flag is not None:
-            	self.obstacles_pub.publish(self.stop_flag)
+            self.obstacles_pub.publish(self.stop_flag)
             r.sleep()
     
 
