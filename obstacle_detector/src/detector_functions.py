@@ -1,7 +1,6 @@
 """Provides functions for use in the obstacle detection node."""
 import ctypes
 from math import cos, sin, sqrt
-from itertools import product
 
 import networkx as nx
 
