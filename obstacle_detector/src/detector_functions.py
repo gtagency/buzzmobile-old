@@ -35,7 +35,7 @@ def clean_scan(angle_min, angle_inc,
     ranges -- Iterable of numbers representing ranges.
     step -- Skips step angles each time. Defaults to one(no skips).
     """
-    return [(rho, angle_min + angle_inc*i) for i,rho in enumerate(ranges)[::step] if rmin < rho < rmax]
+    return [(rho, angle_min + angle_inc*i) for i,rho in enumerate(ranges[::step]) if rmin < rho < rmax]
 
 
 def polar2cart(coords):
