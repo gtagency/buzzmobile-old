@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from math import pi
+
 import roslib
 import rospy
 from std_msgs.msg import Bool, Header
@@ -9,6 +11,8 @@ import detector_functions as df
 
 df.GROUPING_DISTANCE = .1
 df.MIN_GROUP_SIZE = 5
+df.START_ANGLE = -pi/4
+df.END_ANGLE = pi/4
 RANGE_STEP = 10
 # Obstacle distance threshold.
 MIN_DISTANCE = 3
