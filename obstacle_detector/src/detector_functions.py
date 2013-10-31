@@ -23,18 +23,18 @@ DETECTOR_LIB.get_edges.argtypes = [ctypes.POINTER(ctypes.c_double),
 
 def closest_point(points):
     if not points:
-	return float('inf')
+        return float('inf')
     return min(_grouping_metric(p,(0,0)) for p in points)
-	
+
 
 def clean_scan(angle_min, angle_max, angle_inc,
-	       rmin, rmax, ranges, step=1):
+               rmin, rmax, ranges, step=1):
     """
     Return laser scan in in form [(rho,phi),...]
     Throws out any ranges too close/far.
 
     Args:
-    angle_min -- Minumum angle of scan(seems to be -pi/2 for Hokuyo).
+    angle_min -- Minimum angle of scan(seems to be -pi/2 for Hokuyo).
     angle_inc -- Change in angle between ranges(seems to be pi/720 for Hokuyo).
     rmin -- Minimum range(ranges less than this should be discarded).
     rmax -- Maximum range(ranges greater than this should be discarded).
@@ -118,8 +118,8 @@ def _get_edges(points):
     ptr = ctypes.cast(ptr_addr, INTP)
 
     DETECTOR_LIB.get_edges(xin, yin, x1out, y1out, x2out, y2out,
-              ctypes.c_int(len(points)),
-              ctypes.c_double(GROUPING_DISTANCE), ptr)
+                           ctypes.c_int(len(points)),
+                           ctypes.c_double(GROUPING_DISTANCE), ptr)
     num_edges = ptr[0]
     edges = list(zip(((x1out[i],y1out[i]) for i in range(num_edges)),
                      ((x2out[i],y2out[i]) for i in range(num_edges))))

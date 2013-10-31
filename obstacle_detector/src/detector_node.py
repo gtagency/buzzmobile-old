@@ -18,7 +18,6 @@ RANGE_STEP = 10
 MIN_DISTANCE = 3
 
 
-
 class Detector(object):
     def __init__(self):
         self.stop_flag = False
@@ -27,16 +26,15 @@ class Detector(object):
         rospy.Subscriber("scan", LaserScan, self.update_obstacles)
 
     def update_obstacles(self, scan):        
-	points = df.clean_scan(scan.angle_min, scan.angle_max,
+        points = df.clean_scan(scan.angle_min, scan.angle_max,
                                scan.angle_increment,
-			       scan.range_min, scan.range_max,
+                               scan.range_min, scan.range_max,
                                scan.ranges, RANGE_STEP)
-	points = df.polar2cart(points)
+        points = df.polar2cart(points)
         groups = df.group_points(points)
-	hulls = [df.graham_scan(g) for g in groups]
-	closest = df.closest_point([p for hull in hulls for p in hull])
-	
-	self.stop_flag = closest < MIN_DISTANCE
+        hulls = [df.graham_scan(g) for g in groups]
+        closest = df.closest_point([p for hull in hulls for p in hull])
+        self.stop_flag = closest < MIN_DISTANCE
 
     def run(self):
         r = rospy.Rate(25)
