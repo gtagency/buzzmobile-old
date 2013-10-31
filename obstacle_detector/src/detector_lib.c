@@ -3,16 +3,16 @@
 void get_edges(double *points_x, double *points_y,
                double *edges1_x, double *edges1_y,
                double *edges2_x, double *edges2_y,
-               int length, int *num_edges);
+               int length, double d, int *num_edges);
 
 void get_edges(double *points_x, double *points_y,
                double *edges1_x, double *edges1_y,
                double *edges2_x, double *edges2_y,
-               int length, int *num_edges){
+               int length,  double d, int *num_edges){
     int i,j;
     int n = 0;
-    double d, dx, dy;
-    d = 1;
+    double dx, dy;
+    d = d*d;
 
     for (i = 0; i < length; i++){
         for (j = i+1; j < length; j++){
