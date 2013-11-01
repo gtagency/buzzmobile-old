@@ -22,6 +22,13 @@ DETECTOR_LIB.get_edges.argtypes = [ctypes.POINTER(ctypes.c_double),
                                    ctypes.POINTER(ctypes.c_int)]
 
 def closest_point(points):
+    """
+    Return the distance of the closest obstacle point.
+    If points is empty return positive infinity.
+
+    Args:
+    points -- iterable of 2D points in form [(x,y),...]
+    """
     if not points:
         return float('inf')
     return min(_grouping_metric(p,(0,0)) for p in points)
@@ -32,14 +39,17 @@ def clean_scan(angle_min, angle_max, angle_inc,
     """
     Return laser scan in in form [(rho,phi),...]
     Throws out any ranges too close/far.
+    For an even scan use angle_min/max = -phi,phi.
+    Magnitude of angle_min/max should be at most pi/2.
 
     Args:
-    angle_min -- Minimum angle of scan(seems to be -pi/2 for Hokuyo).
+    angle_min -- Starting angle for scan.
+    angle_max -- Ending angle for scan.
     angle_inc -- Change in angle between ranges(seems to be pi/720 for Hokuyo).
     rmin -- Minimum range(ranges less than this should be discarded).
     rmax -- Maximum range(ranges greater than this should be discarded).
     ranges -- Iterable of numbers representing ranges.
-    step -- Skips step angles each time. Defaults to one(no skips).
+    step -- Skips step angles each time. Defaults to one i.e. no skips.
     """
     start = int(round(abs((angle_min-START_ANGLE)/angle_inc)))
     end = len(ranges) - int(round(abs((angle_max-END_ANGLE)/angle_inc)))
@@ -101,6 +111,13 @@ def _grouping_metric(p1, p2):
 
 
 def _get_edges(points):
+    """
+    Return edge list for graph.
+    An edge: (a,b) is added iff d(a,b) <= GROUPING_DISTANCE.
+
+    Args:
+    points -- iterable of 2D points in form [(x,y),...]
+    """
     length = int((len(points)*(len(points)-1))/2)
     x,y = zip(*points)
 

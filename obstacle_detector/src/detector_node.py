@@ -11,6 +11,7 @@ import detector_functions as df
 
 df.GROUPING_DISTANCE = .1
 df.MIN_GROUP_SIZE = 5
+#Do NOT use values with magnitude greater than pi/2.
 df.START_ANGLE = -pi/4
 df.END_ANGLE = pi/4
 RANGE_STEP = 10
