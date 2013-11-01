@@ -15,7 +15,7 @@ df.START_ANGLE = -pi/4
 df.END_ANGLE = pi/4
 RANGE_STEP = 10
 # Obstacle distance threshold.
-MIN_DISTANCE = 3
+MIN_DISTANCE = 0.8
 
 
 class Detector(object):
