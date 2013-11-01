@@ -137,6 +137,8 @@ def group_points(points):
     Args:
     points -- iterable of 2D points in form [(x,y),...]
     """
+    if not points:
+        return []
     g = nx.Graph()
     g.add_edges_from(_get_edges(points))
     groups = nx.connected_components(g)
