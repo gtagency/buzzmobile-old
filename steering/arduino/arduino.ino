@@ -21,7 +21,15 @@ Command commands[] = {
 
 int commandCount = sizeof(commands)/sizeof(commands[0]);
 
+//NOTE: values in raw readings from sensor.  assumes left = smaller numbers, right = larger numbers
+int maxLeft = 200;
+int maxRight = 800;
+
 void turnLeft(CommandState& state) {
+  if (state.sensorVal < maxLeft) {
+    fullStop(state);
+    return;
+  }
   //release the break, if it hasnt been released
   if (!state.brakeReleased) {
     digitalWrite(ch->brakePIn, LOW);
@@ -34,6 +42,10 @@ void turnLeft(CommandState& state) {
 }
 
 void turnRight(CommandState& state) {
+  if (state.sensorVal > maxRight) {
+    fullStop(state);
+    return;
+  }
   //release the break, if it hasnt been released
   if (!state.brakeReleased) {
     digitalWrite(ch->brakePIn, LOW);
@@ -80,6 +92,10 @@ void loop() {
     //set the state
     state.sensorVal  = analogRead(ch->sensorAPin);
     state.currentVal = analogRead(ch->curSensingAPin);
+    //uncomment to monitor the sensor value
+    //    char buf[32] = {0};
+    //    sprintf(buf, "%d\n", state.sensorVal);
+    //    Serial.write(buf);
     state.cmdByte = inByte;
     Command *cmd = findCommand(inByte);
     if (cmd) {
