@@ -1,5 +1,36 @@
 /*************************************************************
+ Steering control for the buzzmobile car.  This was originally
+ built for a Arduino Uno r3 with MotorShield, controlling a
+ linear actuator hooked up to Channel A.
+ 
+ A host controls the steering by issuing one or more commands.
 
+ Available commands:
+   l - turn left
+   r - turn right
+   s - full stop
+ 
+ Commands are sent over a 9600 baud serial connection.  Each
+ command will last 20ms (hard delay in loop()).  The host must
+ not send commands faster than 20ms, or this controller will
+ get confused and behave erratically.
+
+ Recognized commands are written back across the COM port.
+ Strings of the same command are processed in batch, to provide
+ continuous steering.  Each command in a batch is reported back
+ to the host as the command is run, and each batch is terminated
+ with a space and the word "done".
+ 
+ Unrecognized commands are reported as ?.  Unrecongized commands
+ are still batched in the same manner (i.e. same commands are
+ processed in a batch) which may result in a string of multiple ?
+ followed by " done".
+ 
+ This controller is configured to accept steering position
+ over the analog in port, and limit steering to within
+ acceptable positions.  To adjust these, change maxLeft
+ and maxRight in the code.
+ 
 *************************************************************/
 
 #include "motorcontrol.h"
@@ -7,6 +38,13 @@
 
 /** Use channel A */
 Channel *ch = &ChA;
+
+/** Max left and right sensor readings */
+//NOTE: values in raw readings from sensor.
+// assumes left = smaller numbers, right = larger numbers
+int maxLeft = 200;
+int maxRight = 800;
+
 
 /** Steering commands */
 void turnLeft (CommandState& state);
@@ -20,10 +58,6 @@ Command commands[] = {
 };
 
 int commandCount = sizeof(commands)/sizeof(commands[0]);
-
-//NOTE: values in raw readings from sensor.  assumes left = smaller numbers, right = larger numbers
-int maxLeft = 200;
-int maxRight = 800;
 
 void turnLeft(CommandState& state) {
   if (state.sensorVal < maxLeft) {
@@ -105,7 +139,9 @@ void loop() {
       //? means we didn't recognize the command
       Serial.write("?");
     }
-    delay(50);
+    //NOTE: this delay must match the delay on the sender side, or else
+    // bad things.
+    delay(20);
   } while (Serial.peek() == inByte);
   //indicate that the command is done
   Serial.write(" done\n");
