@@ -3,28 +3,36 @@
  built for a Arduino Uno r3 with MotorShield, controlling a
  linear actuator hooked up to Channel A.
  
- A host controls the steering by issuing one or more commands.
+ Command: 
+ 
+ A host controls the steering by issuing one or more commands,
+ which changes the state of the controller, and observes the
+ state of the linear actuator by reading the response.
+ The host communicates with the controller over a 9600 baud
+ serial connection.
 
  Available commands:
    l - turn left
    r - turn right
-   s - full stop
- 
- Commands are sent over a 9600 baud serial connection.  Each
- command will last 20ms (hard delay in loop()).  The host must
- not send commands faster than 20ms, or this controller will
- get confused and behave erratically.
+   s - full stop (start state)
 
- Recognized commands are written back across the COM port.
- Strings of the same command are processed in batch, to provide
- continuous steering.  Each command in a batch is reported back
- to the host as the command is run, and each batch is terminated
- with a space and the word "done".
+ When the controller receives a recognized command, it sets the
+ state of the controller until the next command is received.
  
- Unrecognized commands are reported as ?.  Unrecongized commands
- are still batched in the same manner (i.e. same commands are
- processed in a batch) which may result in a string of multiple ?
- followed by " done".
+ Response:
+ 
+ The controller runs on a 20ms loop; on each iteration, the
+ controller reads its sensors and attempts to process a command.
+
+ Response format (given by the following regexp):
+  s[0-9]+u[0-9]+(c[lrs?])? 
+ 
+ The response is constructed as described above; command is
+ optional and only sent back if a command was processed on that
+ iteration.  Recognized commands are reported as their command
+ Unrecognized commands are reported as ?.
+
+ Configuration:
  
  This controller is configured to accept steering position
  over the analog in port, and limit steering to within
@@ -113,42 +121,35 @@ void setup() {
   Serial.write(" commands\n");
 }
 
-void loop() {
-  
-  int inByte = Serial.peek();
-  if (inByte == -1) {
-     return;
-  }
+CommandState state = {0};
 
-  CommandState state = {0};
-  do {
-    int inByte = Serial.read();
-    //set the state
-    state.sensorVal  = analogRead(ch->sensorAPin);
-    state.currentVal = analogRead(ch->curSensingAPin);
-    //uncomment to monitor the sensor value
-    //    char buf[32] = {0};
-    //    sprintf(buf, "%d\n", state.sensorVal);
-    //    Serial.write(buf);
-    state.cmdByte = inByte;
+void loop() {
+
+  //report sensor state
+  state.sensorVal  = analogRead(ch->sensorAPin);
+  state.currentVal = analogRead(ch->curSensingAPin);
+
+  char buf[32] = {0};
+  sprintf(buf, "s%du%d", state.sensorVal, state.currentVal);
+  Serial.write(buf);
+
+  int inByte = Serial.read();
+  //respond to state
+  if (inByte != -1 && state.cmdByte != inByte) {
     Command *cmd = findCommand(inByte);
+    Serial.write('c');
     if (cmd) {
-      Serial.write(inByte);  
+      state.cmdByte = inByte;
+      Serial.write(inByte);
       cmd->doCommand(state);
     } else {
       //? means we didn't recognize the command
       Serial.write("?");
     }
-    //NOTE: this delay must match the delay on the sender side, or else
-    // bad things.
-    delay(20);
-  } while (Serial.peek() == inByte);
-  //indicate that the command is done
-  Serial.write(" done\n");
-  //always leave loop with the brake engaged
-  if (state.brakeReleased) {
-    digitalWrite(ch->brakePIn, HIGH);
-    analogWrite(ch->motorPin, 0);
   }
+  Serial.write("\n");
+  //this delay appears to be required to prevent the serial port from
+  // locking up
+  delay(20);
 }
 
