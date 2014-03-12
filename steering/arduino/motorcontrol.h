@@ -13,7 +13,7 @@ struct Channel {
   int sensorAPin;
   int dirPin;
   int motorPin;
-  int brakePIn;
+  int brakePin;
   int curSensingAPin;
 };
 

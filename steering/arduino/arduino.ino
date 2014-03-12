@@ -44,14 +44,18 @@
 #include "motorcontrol.h"
 #include "command.h"
 
-/** Use channel A */
-Channel *ch = &ChA;
+//Teensy 2.0
+//B2 = 2 = DIR
+//B7 = 4 = PWM
+//F7 = 19(A2) = sensor
+Channel teensy = {A2, 2, 4, 0, 0};
+Channel *ch = &teensy;
 
 /** Max left and right sensor readings */
 //NOTE: values in raw readings from sensor.
-// assumes left = smaller numbers, right = larger numbers
-int maxLeft = 200;
-int maxRight = 800;
+// assumes right = smaller numbers, left = larger numbers
+int maxRight = 330;
+int maxLeft = 730;
 
 
 /** Steering commands */
@@ -68,41 +72,41 @@ Command commands[] = {
 int commandCount = sizeof(commands)/sizeof(commands[0]);
 
 void turnLeft(CommandState& state) {
-  if (state.sensorVal < maxLeft) {
+  if (state.sensorVal > maxLeft) {
     fullStop(state);
     return;
   }
   //release the break, if it hasnt been released
   if (!state.brakeReleased) {
-    digitalWrite(ch->brakePIn, LOW);
+    digitalWrite(ch->brakePin, LOW);
     state.brakeReleased = true;
   }
-  //establish forward direction of channel and spin motor at full speed
-  //TODO: support partial speeds
-  digitalWrite(ch->dirPin, HIGH);
-  analogWrite(ch->motorPin, 255);
-}
-
-void turnRight(CommandState& state) {
-  if (state.sensorVal > maxRight) {
-    fullStop(state);
-    return;
-  }
-  //release the break, if it hasnt been released
-  if (!state.brakeReleased) {
-    digitalWrite(ch->brakePIn, LOW);
-    state.brakeReleased = true;
-  }
-
   //establish forward direction of channel and spin motor at full speed
   //TODO: support partial speeds
   digitalWrite(ch->dirPin, LOW);
   analogWrite(ch->motorPin, 255);
 }
 
+void turnRight(CommandState& state) {
+  if (state.sensorVal < maxRight) {
+    fullStop(state);
+    return;
+  }
+  //release the break, if it hasnt been released
+  if (!state.brakeReleased) {
+    digitalWrite(ch->brakePin, LOW);
+    state.brakeReleased = true;
+  }
+
+  //establish forward direction of channel and spin motor at full speed
+  //TODO: support partial speeds
+  digitalWrite(ch->dirPin, HIGH);
+  analogWrite(ch->motorPin, 255);
+}
+
 void fullStop(CommandState& state) {
   analogWrite(ch->motorPin, 0);
-  digitalWrite(ch->brakePIn, HIGH);
+  digitalWrite(ch->brakePin, HIGH);
   state.brakeReleased = false;
 }
 
@@ -114,7 +118,7 @@ void setup() {
 //  pinMode(ch->sensorPinA, INPUT);
   pinMode(ch->dirPin, OUTPUT);
   pinMode(ch->motorPin, OUTPUT);
-  pinMode(ch->brakePIn, OUTPUT);
+  pinMode(ch->brakePin, OUTPUT);
   
   //write the number of available commands
   Serial.write(0x30 + commandCount);
@@ -146,6 +150,11 @@ void loop() {
       //? means we didn't recognize the command
       Serial.write("?");
     }
+  }
+  
+  if ((state.sensorVal < maxRight && state.cmdByte == 'r') || 
+      (state.sensorVal > maxLeft && state.cmdByte == 'l')) {
+    fullStop(state);
   }
   Serial.write("\n");
   //this delay appears to be required to prevent the serial port from

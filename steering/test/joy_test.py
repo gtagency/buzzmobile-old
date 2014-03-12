@@ -6,7 +6,7 @@ pygame.init()
 js=pygame.joystick.Joystick(0)
 js.init()
 
-ser = serial.Serial('/dev/tty.usbmodem1411', 9600)
+ser = serial.Serial('/dev/tty.usbmodem12341', 9600)
 print js.get_numbuttons()  # perhaps coincidentally correctly prints 17 which is the number of buttons on a PS3 controller
 try:
   state = 's'
