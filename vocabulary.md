@@ -10,11 +10,8 @@
   - Catkin -> sucks
     - new one
   - rosbuild -> doesn't suck
-
 - Subdirectory
-  - 
-- Workspace
-  - 
+  - They are subfolders, come on now
 - topics
   - can publish or subscribe to a single topic
   - Are essentially 
@@ -23,12 +20,14 @@
   - Can be a publisher, subsriber, or service (function call and response)
   - subscribe to one or more topics
 - messages
-  - stuff
+  - stuff sent between nodes
 - publisher
   - constantly
 - subscriber
-  - stuff
+  - gets alerts from things it is subscribed to and can then do stuff based on them
 - service
   - a function call like thing, essentially a 1-time call in ROS
+- latched topic
+  - provides the last known value instead of timing out 
 
 hydro
