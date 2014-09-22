@@ -1,0 +1,12 @@
+<stack>
+  <description brief="buzzmobile self driving parade float">
+    A set of code and messages that enable the Buzzmobile self driving parade
+    float, maintained by The Agency artificial intelligence club at Georgia
+    Tech College of Computing.
+  </description>
+  <author>Maintained by The Agency</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+<!--  <url>http://pr.willowgarage.com/wiki/common</url> -->
+  <depend stack="ros"/>
+</stack>

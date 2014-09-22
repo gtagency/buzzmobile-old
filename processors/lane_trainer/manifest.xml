@@ -1,0 +1,17 @@
+<package>
+  <description brief="lane_trainer">
+
+     lane_trainer
+
+  </description>
+  <author>viki</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/lane_trainer</url>
+  <depend package="roscpp"/>
+  <depend package="opencv2"/>
+  <depend package="sensor_msgs"/>
+
+</package>
+
+
