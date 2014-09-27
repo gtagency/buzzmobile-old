@@ -1,12 +1,14 @@
 #include <ros/ros.h>
-#include <sensor_msgs/sensor_msgs.h>
-#include "msgs/LaneTrain.h"
-#include "msgs/Lane.h"
-#include "msgs/LaneArray.h"
+#include <sensor_msgs/Image.h>
+#include "lane_classifier/LaneTrain.h"
+#include "lane_classifier/Lane.h"
+#include "lane_classifier/LaneArray.h"
 #include "image.h"
 #include "classifier.h"
 #include "score.h"
 #include "profiler.h"
+
+using namespace lane_classifier;
 
 ros::Publisher lanes_pub;
 
@@ -65,13 +67,13 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "lane_classifier");
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe<LaneTrain>("road_class_train", 1000, trainingCallback);
-  ros::Subscriber sub = n.subscribe<sensor_msgs::Image>("image_projected", 1000, imageCallback);
+  sub = n.subscribe<sensor_msgs::Image>("image_projected", 1000, imageCallback);
 
   int k = 21;
   int data[3] = {0};
   Evaluation eval;
   eval._data  = data;
-  eval._score = scoreHueAndSat;
+  eval._score = score::scoreHueAndSat;
   c = new Classifier(new Profiler(), k, eval);
 
   lanes_pub = n.advertise<LaneArray>("lanes", 100);

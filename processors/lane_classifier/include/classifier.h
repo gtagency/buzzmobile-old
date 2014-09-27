@@ -34,14 +34,15 @@ public:
 class Classifier {
 private:
     Profiler *profiler;
+    int k;
+    const Evaluation& evaluation;
+    
     std::vector<InstAndScore> instances;
     std::map<int, int> f;
-    const Evaluation& evaluation;
-    int k;
     int maxLabel;
-    
-    int findClosestIndex(const Instance& inst) const;
-    std::vector<InstAndScore *> findKNearest(const Instance& inst);
+
+    int findClosestIndex(const InstAndScore& inst) const;
+    std::vector<InstAndScore *> findKNearest(const InstAndScore& inst);
     int doClassify(const InstAndScore& ias);
 
 public:

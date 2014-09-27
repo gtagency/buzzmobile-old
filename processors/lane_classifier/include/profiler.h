@@ -1,6 +1,7 @@
 #ifndef __PROFILER_H
 #define __PROFILER_H
 
+#include <stdint.h>
 #include <ctime>
 #include <set>
 #include <vector>

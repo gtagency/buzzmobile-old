@@ -1,11 +1,12 @@
-
+#include <stdint.h>
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
+#include <cstring>
 #include "math.h"
 #include "classifier.h"
 #include "instance.h"
-
 using namespace std;
 /*
 #undef PROFILER_START_FUN
@@ -50,8 +51,8 @@ std::vector<InstAndScore *> Classifier::findKNearest(const InstAndScore& inst) {
     PROFILER_START_FUN(profiler);
     std::vector<InstAndScore *> kNearest;
 //    InstAndScore **kn = new InstAndScore*[this->k];
-    InstAndScore *kn[32];
-    int kninx = 0;
+    //InstAndScore *kn[32];
+    //int kninx = 0;
     if (mid >= 0) {
 
         //NOTE: this range will be 1 or 2 bigger than k
@@ -236,18 +237,19 @@ int findClosestIndexG(const InstAndScore& inst, const std::vector<InstAndScore>&
 }
 std::vector<int> Classifier::classifyAll(const std::vector<Instance>& instances) {
 
+//FIXME: this looks like it was never implemented -- JR, 09/27/14
     PROFILER_START_FUN(profiler);
-//    std::vector<InstAndScore> incoming = makeInstAndScore(instances);
+    std::vector<InstAndScore> incoming = makeInstAndScore(instances);
     std::vector<int> labels;
     std::set<int> scores;
 
     int ii = 0;
-    for (std::vector<Instance>::const_iterator it = instances.begin();
-         it != instances.end();
+    for (std::vector<InstAndScore>::const_iterator it = incoming.begin();
+         it != incoming.end();
          it++) {
         int score = ii++; //evaluation.score(*it);
         if (scores.find(score) == scores.end()) {
-            int nearest = findClosestIndex(*it);
+            //int nearest = findClosestIndex(*it);
             scores.insert(score);
         }
          
@@ -290,7 +292,7 @@ int Classifier::classify(const Instance& instance) {
 
 int Classifier::doClassify(const InstAndScore& ias) {
     
-    std::vector<InstAndScore *> kNearest = findKNearest(ias.instance);
+    std::vector<InstAndScore *> kNearest = findKNearest(ias);
     PROFILER_START(profiler, mostFrequentLabel);
 //    std::map<int, int> histogram;
     int label = -1;
