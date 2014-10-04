@@ -1,0 +1,15 @@
+<package>
+  <description brief="core_msgs">
+
+     core_msgs
+
+  </description>
+  <author>Thomas Shields</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/core_msgs</url>
+    
+  <depend package="geometry_msgs"/>
+</package>
+
+
