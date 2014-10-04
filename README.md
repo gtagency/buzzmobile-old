@@ -4,12 +4,19 @@ Buzzmobile - The self driving parade float
 ##Subfolders
 - sensors
   - Take in data from phyical things and spit out minimally processed data (generally)
-  - could also be "lines" in that the sesor returns a set of lines
+  - could also be "lines" in that the sensor returns a set of lines
   - nodes
     - camera
+      - courtesy of [usb_cam]
     - gps
+      - courtesy of [NMEA_NavSat]
     - lidar
+      - courtesy of [hokuyo_node]
     - encoder(s)
+      - courtesy of Robojackets
+      - axle encoders provide PD values
+      - steering encoders are just potentiometers
+      - we may want to do additional processing, but that can come later
   - topics
     - ../image_raw
     - scan
