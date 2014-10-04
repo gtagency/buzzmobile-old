@@ -36,3 +36,14 @@ nosetests.xml
 
 #rosmake/rosbuild
 msg_gen
+
+*.swp
+Makefile
+=======
+
+#.tex file
+*.pdf
+*.log
+*.aux
+*.fdb_latexmk
+*.synctex.gz
