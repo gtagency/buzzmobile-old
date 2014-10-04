@@ -36,3 +36,6 @@ nosetests.xml
 
 #rosmake/rosbuild
 msg_gen
+
+*.swp
+Makefile
