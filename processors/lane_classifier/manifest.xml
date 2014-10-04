@@ -12,6 +12,8 @@
   <depend package="std_msgs"/>
   <depend package="sensor_msgs"/>
   <depend package="message_generation"/>
+  <depend package="cv_bridge"/>
+  <depend package="lane_trainer"/>
 
 </package>
 

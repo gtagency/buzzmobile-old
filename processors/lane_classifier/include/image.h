@@ -12,6 +12,7 @@ namespace image {
 	extern void (*getFeatures)(const Point3_<uchar>* pt, uchar features[2]);
 
 	const Instance makeInstance(uchar imgFeatures[2], int pixelDist, int label);
+	const Instance makeInstance(uchar imgFeatures[2], int label);
 
 	void getLightInvariantBGR(const Mat& bgr, Mat& libgr);
 	void maskImageByDensity(Mat& img);

@@ -14,7 +14,7 @@ public:
   //  Instance(Instance& copy);
     //Instance(const Instance& copy);
     virtual ~Instance();
-    double getFeature(int feature) const;
+    double getFeature(unsigned int feature) const;
 
 	int clearUses();
 	int markUsed();

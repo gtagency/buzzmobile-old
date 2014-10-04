@@ -15,8 +15,8 @@ Instance::Instance(int n, double *f, int l) : label(l), uses(0) {
 Instance::~Instance() {
 }
 
-double Instance::getFeature(int feature) const {
-    assert(feature >= 0 && feature < this->features.size());
+double Instance::getFeature(unsigned int feature) const {
+    assert(feature < this->features.size());
     return this->features[feature];
 }
 
