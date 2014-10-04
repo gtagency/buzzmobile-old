@@ -4,6 +4,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
+#include "balance.hpp"
 
 #include "projection.h"
 
@@ -40,7 +41,10 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
 
   cv::Mat proj;
   proj::groundTransformProj(cv_ptr->image, params, proj);
-  //JOSH INSERT CODE HERE
+  balance::grayWorld(proj, proj);
+
+
+
   std_msgs::Header header;
   cv_bridge::CvImage projImage(header, getRosType(proj.type()), proj);
 

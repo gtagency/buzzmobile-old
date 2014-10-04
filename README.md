@@ -46,6 +46,7 @@ Buzzmobile - The self driving parade float
   - nodes
     - stay right
     - driver
+    - teleop_joy (human control)
   - topics
     - planned_path
     - planned_pose(s)
