@@ -1,3 +1,3 @@
-uint8 H
-uint8 S
-uint8 class
+uint8 h
+uint8 s
+uint8 label
