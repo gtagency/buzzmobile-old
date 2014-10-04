@@ -36,10 +36,9 @@ nosetests.xml
 
 #rosmake/rosbuild
 msg_gen
+srv_gen
 
 *.swp
-Makefile
-=======
 
 #.tex file
 *.pdf
