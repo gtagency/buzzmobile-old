@@ -1,0 +1,18 @@
+<package>
+  <description brief="controller_teleop">
+
+     controller_teleop
+
+  </description>
+  <author>Thomas Shields</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/controller_teleop</url>
+  
+  <depend package="roscpp"/>
+  <depend package="core_msgs"/>
+  <depend package="sound_play"/>
+
+</package>
+
+
