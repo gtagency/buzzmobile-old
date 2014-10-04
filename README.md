@@ -1,5 +1,7 @@
 Buzzmobile - The self driving parade float
 ================
+[![PDF Status](https://www.sharelatex.com/github/repos/gtagency/buzzmobile/builds/latest/badge.svg)](https://www.sharelatex.com/github/repos/gtagency/buzzmobile/builds/latest/output.pdf)
+
 
 ##Subfolders
 - sensors
@@ -26,7 +28,9 @@ Buzzmobile - The self driving parade float
   - nodes
     - classifier
     - short range lane detector
-    - projection
+    - image_projected
+      - takes in image_raw data
+      - provides processed data with magic geometry and color preprocessing
     - lane extractor
     - obstacle extractor
   - topics
