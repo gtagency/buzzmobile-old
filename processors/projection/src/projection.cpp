@@ -2,7 +2,7 @@
 #include "math.h"
 #include "projection.h"
 
-using namespace cv;
+using namespace cv; 
 namespace proj {
 
     void groundTransformProj(const Mat& input, const ProjectionParams& params, Mat& output) {
