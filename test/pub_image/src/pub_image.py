@@ -12,6 +12,7 @@ image_pub = None
 bridge = CvBridge()
 
 def publish_from_file(filename):
+    print "Publishing", filename, cv2.imread(filename)
     global bridge,image_pub
     cv_image = cv.fromarray(cv2.imread(filename))
     image_pub.publish(bridge.cv_to_imgmsg(cv_image, "bgr8"))

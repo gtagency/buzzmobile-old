@@ -1,0 +1,14 @@
+<package>
+  <description brief="buzzmobile_launch">
+
+     buzzmobile_launch
+
+  </description>
+  <author>Jesse Rosalia</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/buzzmobile_launch</url>
+
+</package>
+
+

@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/pub_image</url>
   <depend package="rospy"/>
+  <depend package="opencv2"/>
   <depend package="cv_bridge"/>
   <depend package="std_msgs"/>
   <depend package="sensor_msgs"/>

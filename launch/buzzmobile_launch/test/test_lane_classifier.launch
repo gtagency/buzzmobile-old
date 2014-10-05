@@ -1,0 +1,13 @@
+<launch>
+    <node pkg="pub_image" name="pub_image" type="pub_image.py">
+        <remap from="image_raw" to="image_projected"/>
+	<param name="image_file" value="/home/thejenix/agency/buzzmobile/test/pub_image/images/frame8.png"/>
+    </node>
+    <node pkg="image_view" name="image_view" type="image_view">
+        <remap from="image" to="image_raw" />
+    </node>
+<!--    <node pkg="lane_trainer" name="lane_trainer_node" type="lane_trainer_node" /> -->
+<!--    <node pkg="lane_classifier" name="lane_classifier_node" type="lane_classifier_node" /> -->
+    <!--<node pkg="lane_extractor" name="lane_extractor_node" type="lane_extractor_node" />
+    <node pkg="lane_marking_extractor" name="lane_marking_extractor" type="lane_marking_extractor" /> -->
+</launch>
