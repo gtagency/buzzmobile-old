@@ -25,7 +25,7 @@ void imageMsgToCvCopy(const sensor_msgs::Image::ConstPtr& image, cv_bridge::CvIm
 
 void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
 
-  std::cout << "Image received.";
+  std::cout << "Image received" << std::endl;
   cv::Mat projectedImage, sobelImg, threshImg;
   const int SLICE_Y = 2*(projectedImage.rows/3);
 
@@ -109,12 +109,14 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
 int main(int argc, char *argv[]) {
   //cv::Mat projectedImage = cv::imread(argv[1]);
   
+  std::cout << "Initializing Lane Trainer" << std::endl;
   ros::init(argc, argv, "lane_trainer_node");
   ros::start();
   ros::NodeHandle n;
-  ros::Subscriber sub = n.subscribe<sensor_msgs::Image>("image_projected", 1, &generateTrainingSet);
+  ros::Subscriber sub = n.subscribe<sensor_msgs::Image>("image_projected", 1, generateTrainingSet);
   pub = n.advertise<lane_trainer::LaneInstanceArray>("road_class_train", 1000);
 
   std::cout << "Lane trainer started." << std::endl;
   ros::spin();
+  return 0;
 }
