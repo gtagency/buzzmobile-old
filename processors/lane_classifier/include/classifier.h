@@ -36,6 +36,7 @@ private:
     Profiler *profiler;
     int k;
     const Evaluation& evaluation;
+    bool initialized;
     
     std::vector<InstAndScore> instances;
     std::map<int, int> f;
@@ -53,6 +54,8 @@ public:
     void addInstances(const std::vector<Instance>& instances);
     std::vector<int> classifyAll(const std::vector<Instance>& instance);
     int classify(const Instance& instance);
-	int pruneInstances(int thresh);
+    int pruneInstances(int thresh);
+
+    bool isInitialized();
 };
 #endif //__CLASSIFIER_H

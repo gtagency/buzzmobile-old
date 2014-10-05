@@ -18,9 +18,10 @@ Profiler *profiler = new Profiler();
 ros::Publisher driveable_pub;
 ros::Publisher marker_pub;
 
-Classifier *c;
+Classifier *c = NULL;
 
 void trainingCallback(const LaneInstanceArray::ConstPtr& training) {
+  std::cout << (long)c << std::endl;
   std::vector<Instance> instances;
   for (LaneInstanceArray::_instanceArray_type::const_iterator it = training->instanceArray.begin();
        it != training->instanceArray.end();
@@ -47,7 +48,12 @@ void imageMsgToCvCopy(const sensor_msgs::ImageConstPtr& image, cv_bridge::CvImag
 }
 
 void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
-  
+
+  // Only proceed if we're initialized
+  if (!c->isInitialized()) {
+    return;
+  } 
+  std::cout << "Image received." << std::endl;
   cv_bridge::CvImagePtr cv_ptr;
   imageMsgToCvCopy(image, cv_ptr); 
 
@@ -57,11 +63,14 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
   Mat marked = Mat(src.size(), src.type());
   Mat cvt;
   if (getCvType() >= 0) {
+      std::cout << "Converting type" << std::endl;
       cvtColor(src, cvt, getCvType());
   } else {
+      std::cout << "Not converting type" << std::endl;
       cvt = src;
   }
-  uchar features[2];
+  std::cout << cvt.type() << std::endl;
+  uchar features[2] = {0};
   for(int row = 0; row < cvt.rows; ++row) {
     //cout << "Row: " << row << endl;
     Point3_<uchar> *p = cvt.ptr<Point3_<uchar> > (row);
@@ -70,6 +79,7 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
     for(int col = 0; col < cvt.cols; ++col, ++p, ++sp) {
       getFeatures(p, features);
       const Instance inst = makeInstance(features, -1);
+      //printf("Classifying %d,%d\n", features[0], features[1]); 
       int label = c->classify(inst); 
       sp->x = 0;
       //cout << countPositives << endl;
@@ -90,18 +100,20 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
 int main(int argc, char** argv) {
   ros::init(argc, argv, "lane_classifier");
   ros::NodeHandle n;
-  ros::Subscriber sub = n.subscribe<LaneInstanceArray>("road_class_train", 1000, trainingCallback);
-  sub = n.subscribe<sensor_msgs::Image>("image_projected", 1000, imageCallback);
 
   int k = 21;
   int data[2] = {0};
   Evaluation eval;
   eval._data  = data;
   eval._score = score::scoreHueAndSat;
-  c = new Classifier(new Profiler(), k, eval);
+  c = new Classifier(profiler, k, eval);
 
-  driveable_pub = n.advertise<sensor_msgs::Image>("image_drivable", 100);
+  std::cout << "Lane classifier starting." << std::endl;
+  ros::Subscriber sub = n.subscribe<LaneInstanceArray>("road_class_train", 1000, trainingCallback);
+  sub = n.subscribe<sensor_msgs::Image>("image_projected", 1000, imageCallback);
+  driveable_pub = n.advertise<sensor_msgs::Image>("image_driveable", 100);
 //  marker_pub = n.advertise<sen>("image_drivable", 100);
+  std::cout << "Lane classifier started." << std::endl;
   ros::spin();
   delete c;
   return 0;

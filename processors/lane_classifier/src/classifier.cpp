@@ -152,7 +152,7 @@ std::vector<InstAndScore *> Classifier::findKNearest(const InstAndScore& inst) {
 }
 
 
-Classifier::Classifier(Profiler *profiler, int k, const Evaluation& evaluation) : profiler(profiler), k(k), evaluation(evaluation) {
+Classifier::Classifier(Profiler *profiler, int k, const Evaluation& evaluation) : profiler(profiler), k(k), evaluation(evaluation), initialized(false), maxLabel(0) {
     
 }
 
@@ -287,6 +287,7 @@ int Classifier::classify(const Instance& instance) {
         f[ias.score] = doClassify(ias);
     }
 
+//    std::cout << "weeee" << f.size() << std::endl;
     return f[ias.score];
 }
 
@@ -298,6 +299,7 @@ int Classifier::doClassify(const InstAndScore& ias) {
     int label = -1;
     int maxCount = 0;
     int size = kNearest.size();
+    std::cout << "Max label: " << this->maxLabel << std::endl;
     int *histogram = new int[this->maxLabel + 1];
     memset(histogram, 0, (this->maxLabel + 1) * sizeof(int));
     for (int ii = 0; ii < size; ii++) {
@@ -327,4 +329,8 @@ int Classifier::pruneInstances(int thresh) {
 	}
 	this->instances = newVec;
 	return newVec.size();
+}
+
+bool Classifier::isInitialized() {
+  return initialized;
 }
