@@ -6,13 +6,25 @@
 #include <set>
 #include <vector>
 
-#define PROFILE_FUN(p) ProfileScope(p, __FUNCTION__) 
-#define PROFILER_START(p,e)   ProfilerEvent *e##__pe = p->startEvent(#e)
-#define PROFILER_START_FUN(p) ProfilerEvent *__FUNCTION__##__pe = p->startEvent(__FUNCTION__)
+#define PROFILE_FUN(p) ProfileScope(&p, __FUNCTION__) 
+#define PROFILER_START(p,e)   ProfilerEvent *e##__pe = p.startEvent(#e)
+#define PROFILER_START_FUN(p) ProfilerEvent *__FUNCTION__##__pe = p.startEvent(__FUNCTION__)
 
-#define PROFILER_STOP(p,e)   p->stopEvent(e##__pe)
-#define PROFILER_STOP_FUN(p) p->stopEvent(__FUNCTION__##__pe)
+#define PROFILER_STOP(p,e)   p.stopEvent(e##__pe)
+#define PROFILER_STOP_FUN(p) p.stopEvent(__FUNCTION__##__pe)
 
+extern class Profiler profiler;
+/*
+#undef PROFILER_START_FUN
+#undef PROFILER_STOP_FUN
+#undef PROFILER_START
+#undef PROFILER_STOP
+
+#define PROFILER_START_FUN(p)
+#define PROFILER_STOP_FUN(p)
+#define PROFILER_START(p,e)
+#define PROFILER_STOP(p,e)
+*/
 struct ProfilerEvent {
     const char *name;
     uint64_t start;

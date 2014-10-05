@@ -31,9 +31,9 @@ public:
     Instance instance;
     double score;
 };
+
 class Classifier {
 private:
-    Profiler *profiler;
     int k;
     const Evaluation& evaluation;
     bool initialized;
@@ -42,18 +42,18 @@ private:
     std::map<int, int> f;
     int maxLabel;
 
-    int findClosestIndex(const InstAndScore& inst) const;
-    std::vector<InstAndScore *> findKNearest(const InstAndScore& inst);
-    int doClassify(const InstAndScore& ias);
+    int findClosestIndex(const double score) const;
+    std::vector<InstAndScore *> findKNearest(const double score);
+    std::vector<InstAndScore> makeInstAndScore(const std::vector<Instance>& instances);
+    int doClassify(const double score);
 
 public:
 
-//    Classifier(int k, Evaluation evaluation); 
-    Classifier(Profiler *profiler, int k, const Evaluation& evaluation); 
+    Classifier(int k, const Evaluation& evaluation); 
 
     void addInstances(const std::vector<Instance>& instances);
-    std::vector<int> classifyAll(const std::vector<Instance>& instance);
-    int classify(const Instance& instance);
+    void classifyAll(std::vector<Instance>& instance);
+    void classify(Instance& instance);
     int pruneInstances(int thresh);
 
     bool isInitialized();

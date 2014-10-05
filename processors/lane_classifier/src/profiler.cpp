@@ -17,6 +17,8 @@ using namespace std;
 #define TIME clock
 #endif
 
+Profiler profiler;
+
 Profiler::Profiler() {
     head = NULL;
     tail = NULL;

@@ -14,11 +14,22 @@ using namespace lane_trainer;
 
 namespace enc = sensor_msgs::image_encodings;
 
-Profiler *profiler = new Profiler();
 ros::Publisher driveable_pub;
 ros::Publisher marker_pub;
 
 Classifier *c = NULL;
+
+class PointInstance : public Instance {
+private:
+  int row;
+  int col;
+public:
+  PointInstance(int row, int col, Instance& inst)
+    : Instance(inst), row(row), col(col) {}
+
+  int getCol() const { return this->col; }
+  int getRow() const { return this->row; }
+};
 
 void trainingCallback(const LaneInstanceArray::ConstPtr& training) {
   std::cout << (long)c << std::endl;
@@ -69,6 +80,8 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
       std::cout << "Not converting type" << std::endl;
       cvt = src;
   }
+  std::vector<PointInstance> instances;
+  std::vector<Instance> toClassify;
   std::cout << cvt.type() << std::endl;
   uchar features[2] = {0};
   for(int row = 0; row < cvt.rows; ++row) {
@@ -78,21 +91,31 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
     //assumes CV_8UC3 LAB color image, with 3 values per pixel
     for(int col = 0; col < cvt.cols; ++col, ++p, ++sp) {
       getFeatures(p, features);
-      const Instance inst = makeInstance(features, -1);
-      //printf("Classifying %d,%d\n", features[0], features[1]); 
-      int label = c->classify(inst); 
-      sp->x = 0;
-      //cout << countPositives << endl;
-      if (label == 1) {
-        sp->y = 0xFF;
-        sp->z = 0;
-      } else if (label == 2) {
-        sp->y = 0;
-        sp->z = 0xFF;
-      } else {
-        sp->y = 0;
-        sp->z = 0;
-      }
+      Instance rawInst = makeInstance(features, -1);
+      PointInstance inst(row, col, rawInst); 
+      //NOTE: two vectors kept because we have to pass a vec<Instance> to classifyAll...it's the same data though
+      instances.push_back(inst);
+      toClassify.push_back(inst);
+    }
+  }
+  c->classifyAll(toClassify);
+  for (std::vector<PointInstance>::iterator it = instances.begin();
+       it != instances.end();
+       it++) {
+
+    Point3_<uchar> *sp = &marked.ptr<Point3_<uchar> >(it->getRow())[it->getCol()];
+    //assumes CV_8UC3 color image, with 3 values per pixel
+    sp->x = 0;
+    //cout << countPositives << endl;
+    if (it->label == 1) {
+      sp->y = 0xFF;
+      sp->z = 0;
+    } else if (it->label == 2) {
+      sp->y = 0;
+      sp->z = 0xFF;
+    } else {
+      sp->y = 0;
+      sp->z = 0;
     }
   }   
 }
@@ -106,7 +129,7 @@ int main(int argc, char** argv) {
   Evaluation eval;
   eval._data  = data;
   eval._score = score::scoreHueAndSat;
-  c = new Classifier(profiler, k, eval);
+  c = new Classifier(k, eval);
 
   std::cout << "Lane classifier starting." << std::endl;
   ros::Subscriber sub = n.subscribe<LaneInstanceArray>("road_class_train", 1000, trainingCallback);
