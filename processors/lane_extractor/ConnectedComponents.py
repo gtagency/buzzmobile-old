@@ -2,11 +2,19 @@ import numpy as np
 import cv2
 from UnionFind import *
 import operator
+import cProfile
 
 class ConnectedComponents:
     
     def __init__(self, image):
         self.image = image
+
+    def getPoints(self, sets):
+        roots = set(sets.parents[x] for x in sets)
+        roots_weights = [(r, sets.weights[r]) for r in roots]
+        mrw = max(roots_weights, key=operator.itemgetter(1))
+        points = [p for p in sets.parents if sets.parents[p] == mrw[0]]
+        return points
 
     def doFindConnectedComponents(self, binary, marked):
         blobs = []
@@ -27,31 +35,29 @@ class ConnectedComponents:
                     adjnames.append(sets[y,x-1])
                     if y-1 >= 0 and binary[y-1,x-1] == on:
                         adjnames.append(sets[y-1,x-1])
-                if x+1 < binary.shape[1] and binary[y,x+1] == on:
-                    adjnames.append(sets[y,x+1])
-                    if y+1 < binary.shape[0] and binary[y+1,x+1] == on:
-                        adjnames.append(sets[y+1,x+1])
+#                if x+1 < binary.shape[1] and binary[y,x+1] == on:
+ #                   adjnames.append(sets[y,x+1])
+  #                  if y+1 < binary.shape[0] and binary[y+1,x+1] == on:
+   #                     adjnames.append(sets[y+1,x+1])
                 if y-1 >= 0 and binary[y-1,x] == on:
                     adjnames.append(sets[y-1,x])
-                    if x+1 < binary.shape[1] and binary[y-1,x+1] == on:
-                        adjnames.append(sets[y-1,x+1])
-                if y+1 < binary.shape[0] and binary[y+1,x] == on:
-                    adjnames.append(sets[y+1,x])
-                    if x-1 >= 0 and binary[y+1,x-1] == on:
-                        adjnames.append(sets[y+1,x-1])
+#                    if x+1 < binary.shape[1] and binary[y-1,x+1] == on:
+ #                       adjnames.append(sets[y-1,x+1])
+  #              if y+1 < binary.shape[0] and binary[y+1,x] == on:
+   #                 adjnames.append(sets[y+1,x])
+    #                if x-1 >= 0 and binary[y+1,x-1] == on:
+     #                   adjnames.append(sets[y+1,x-1])
                 # For efficiency, no need to union if its the same root
                 while xyname in adjnames:
                     adjnames.remove(xyname)
                 if adjnames:
 #                    print "Merging", xyname, "with", adjnames
                     sets.union(xyname, *adjnames)
-        
-        roots = set(sets.parents[x] for x in sets)
-        roots_weights = [(r, sets.weights[r]) for r in roots]
-        mrw = max(roots_weights, key=operator.itemgetter(1))
-        points = [p for p in sets.parents if sets.parents[p] == mrw[0]]
+  
+        points = self.getPoints(sets)
 
-        print count, len(roots), mrw
+
+  #      print count, len(roots), mrw
 
         # Mark the largest connected component in the image
         for p in points:
@@ -91,9 +97,10 @@ class ConnectedComponents:
         self.findConnectedComponents()
         #cv2.drawContours(self.image, self.getPoly(), 0, (255, 0, 0), 3)
         #cv2.imshow("Results", self.image)
-        cv2.waitKey(0)
+#        cv2.waitKey(0)
 
 if __name__ == "__main__":
     image = cv2.imread("testimage.png")
-    p = ConnectedComponents(image)
-    p.showTest()
+    #p = ConnectedComponents(image)
+    #p.showTest()
+    cProfile.run('ConnectedComponents(image).showTest()')
