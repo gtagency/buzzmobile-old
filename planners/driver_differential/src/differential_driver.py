@@ -62,8 +62,8 @@ class DifferentialDriver:
         v = self.targetV
         w = v / (dx / math.tan(dtheta) + dy)
 
-        spdL = self.speedAdjustment * (v - w * self.wheelSeparation / 2) / self.wheelRadius
-        spdR = self.speedAdjustment * (v + w * self.wheelSeparation / 2) / self.wheelRadius
+        spdL = (v - w * self.wheelSeparation / 2) / (self.wheelRadius * self.speedAdjustment)
+        spdR = (v + w * self.wheelSeparation / 2) / (self.wheelRadius * self.speedAdjustment)
 
         return (spdL, spdR)
 
