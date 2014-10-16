@@ -3,6 +3,7 @@ import cv2
 from UnionFind import *
 import operator
 import cProfile
+import dis
 
 class ConnectedComponents:
     
@@ -17,43 +18,34 @@ class ConnectedComponents:
         return points
 
     def doFindConnectedComponents(self, binary, marked):
-        blobs = []
         sets = UnionFind()
 
         count = 0
         on = 255
         for y in xrange(binary.shape[0]):
             for x in xrange(binary.shape[1]):
-                if binary[y,x] != on:
+                if binary[y, x] != 255:
                     continue
                 # Count the "on" pixels, for debugging
-                count+=1
-                xyname = sets[y,x]
+                count += 1
+                xyname = sets[y, x]
                 # TODO: there's probably a much better way to do this
-                adjnames = []
-                if x-1 >= 0 and binary[y,x-1] == on:
-                    adjnames.append(sets[y,x-1])
-                    if y-1 >= 0 and binary[y-1,x-1] == on:
-                        adjnames.append(sets[y-1,x-1])
-#                if x+1 < binary.shape[1] and binary[y,x+1] == on:
- #                   adjnames.append(sets[y,x+1])
-  #                  if y+1 < binary.shape[0] and binary[y+1,x+1] == on:
-   #                     adjnames.append(sets[y+1,x+1])
-                if y-1 >= 0 and binary[y-1,x] == on:
-                    adjnames.append(sets[y-1,x])
-#                    if x+1 < binary.shape[1] and binary[y-1,x+1] == on:
- #                       adjnames.append(sets[y-1,x+1])
-  #              if y+1 < binary.shape[0] and binary[y+1,x] == on:
-   #                 adjnames.append(sets[y+1,x])
-    #                if x-1 >= 0 and binary[y+1,x-1] == on:
-     #                   adjnames.append(sets[y+1,x-1])
+                adjnames = set()
+                #this is hackery and shouldn't work at all
+                if x - 1 >= 0 and binary[y, x - 1] is 255:
+                    adjnames.add(sets[y, x - 1])
+                    if y-1 >= 0 and binary[y - 1, x - 1] is 255:
+                        adjnames.add(sets[y - 1, x - 1])
+
+                if y - 1 >= 0 and binary[y - 1, x] is 255:
+                    adjnames.add(sets[y - 1, x])
+
                 # For efficiency, no need to union if its the same root
                 while xyname in adjnames:
                     adjnames.remove(xyname)
                 if adjnames:
 #                    print "Merging", xyname, "with", adjnames
                     sets.union(xyname, *adjnames)
-  
         points = self.getPoints(sets)
 
 
@@ -104,3 +96,4 @@ if __name__ == "__main__":
     #p = ConnectedComponents(image)
     #p.showTest()
     cProfile.run('ConnectedComponents(image).showTest()')
+    dis.dis(ConnectedComponents.doFindConnectedComponents)
