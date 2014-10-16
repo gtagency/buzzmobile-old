@@ -59,13 +59,14 @@ class DifferentialDriver:
             waypoint = self.waypoints[0]
         dx, dy, dtheta = self.convertToDriverFrame(waypoint)
 
-        v = self.targetV
+        v = 1
         w = v / (dx / math.tan(dtheta) + dy)
 
         spdL = (v - w * self.wheelSeparation / 2) / (self.wheelRadius * self.speedAdjustment)
         spdR = (v + w * self.wheelSeparation / 2) / (self.wheelRadius * self.speedAdjustment)
 
-        return (spdL, spdR)
+        mult = (spdL + spdR)/(2 * self.targetV)
+        return (mult*spdL, mult*spdR)
 
     """ Converts an (x, y, theta) pose from the world coordinate frame to the
         driver coordinate frame. """
