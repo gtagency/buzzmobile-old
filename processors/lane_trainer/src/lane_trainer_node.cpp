@@ -140,12 +140,12 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
   pub.publish(lanes);
 
   //std::cout << roadPts.size() << std::endl;
-
+/*
   cv::imshow("threshImg", threshImg);
   cv::imshow("sobelImg", sobelImg);
   
   cv::imshow("projectedImage", projectedImage);
-  cv::waitKey();
+  cv::waitKey();*/
 }
 
 int main(int argc, char *argv[]) {

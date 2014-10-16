@@ -26,13 +26,13 @@ const std::string& getRosType(int cvType) {
 //NOTE: values copied from Nick's original code, hand tuned to Eleanor.
 proj::ProjectionParams *params = NULL;
 void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
-  cv_bridge::CvImagePtr cv_ptr;
+  cv_bridge::CvImageConstPtr cv_ptr;
   try {
-/*    if (enc::isColor(image->encoding))
+    if (enc::isColor(image->encoding))
       cv_ptr = cv_bridge::toCvShare(image, enc::BGR8);
     else
-      cv_ptr = cv_bridge::toCvShare(image, enc::MONO8);*/
-    cv_ptr = cv_bridge::toCvCopy(image, enc::BGR8);
+      cv_ptr = cv_bridge::toCvShare(image, enc::MONO8);
+//    cv_ptr = cv_bridge::toCvCopy(image, enc::BGR8);
   }
   catch (cv_bridge::Exception& e) {
     ROS_ERROR("cv_bridge exception: %s", e.what());
