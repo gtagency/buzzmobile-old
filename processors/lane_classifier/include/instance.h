@@ -10,6 +10,8 @@ private:
 public:
   int label;
 	int uses;
+  int row;
+  int col;
   Instance(int numFeatures, double *features, int label);
 //  Instance(Instance& copy);
   Instance(const Instance& copy);

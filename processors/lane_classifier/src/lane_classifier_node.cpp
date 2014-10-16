@@ -40,6 +40,7 @@ void trainingCallback(const LaneInstanceArray::ConstPtr& training) {
     uint8_t features[] = {it->h, it->s};
     instances.push_back(makeInstance(features, it->label));
   }
+//  c->pruneInstances(1);
   c->addInstances(instances);
   //TODO: maybe cull/retire old instances
 }
@@ -93,8 +94,6 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
       std::cout << "Not converting type" << std::endl;
       cvt = src;
   }
-  std::vector<PointInstance> instances;
-  instances.reserve(800*800);
   std::vector<Instance> toClassify;
   toClassify.reserve(800*800);
 
@@ -107,27 +106,29 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
     //assumes CV_8UC3 LAB color image, with 3 values per pixel
     for(int col = 0; col < cvt.cols; ++col, ++p, ++sp) {
       getFeatures(p, features);
-      Instance rawInst = makeInstance(features, -1);
-      PointInstance inst(row, col, rawInst); 
-      //NOTE: two vectors kept because we have to pass a vec<Instance> to classifyAll...it's the same data though
-      instances.push_back(inst);
+      Instance inst = makeInstance(features, -1);
+      inst.row = row;
+      inst.col = col;
       toClassify.push_back(inst);
     }
   }
-  c->classifyAll(toClassify);
+  std::vector<int>labels = c->classifyAll(toClassify);
+  std::vector<Instance>::iterator it = toClassify.begin();
+  std::vector<int>::iterator label = labels.begin();
 
-  for (std::vector<PointInstance>::iterator it = instances.begin();
-       it != instances.end();
-       it++) {
+  for (;
+       it != toClassify.end();
+       it++, label++) {
 
-    Point3_<uchar> *sp = &marked.ptr<Point3_<uchar> >(it->getRow())[it->getCol()];
+//  std::cout << "Marking image: " << it->row << "," << it->col << std::endl;
+    Point3_<uchar> *sp = &marked.ptr<Point3_<uchar> >(it->row)[it->col];
     //assumes CV_8UC3 color image, with 3 values per pixel
     sp->x = 0;
     //cout << countPositives << endl;
-    if (it->label == 1) {
+    if (*label == 1) {
       sp->y = 0xFF;
       sp->z = 0;
-    } else if (it->label == 2) {
+    } else if (*label == 2) {
       sp->y = 0;
       sp->z = 0xFF;
     } else {
@@ -135,10 +136,10 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
       sp->z = 0;
     }
   } 
-//  std_msgs::Header header;
- // cv_bridge::CvImage markedImage(header, getRosType(marked.type()), marked);
+  std_msgs::Header header;
+  cv_bridge::CvImage markedImage(header, getRosType(marked.type()), marked);
 
- // driveable_pub.publish(markedImage.toImageMsg());
+  driveable_pub.publish(markedImage.toImageMsg());
   std::cout << "Finished" << std::endl;
   PROFILER_STOP_FUN(profiler);
   profiler.printResults();

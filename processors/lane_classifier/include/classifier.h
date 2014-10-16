@@ -52,7 +52,7 @@ public:
     Classifier(int k, const Evaluation& evaluation); 
 
     void addInstances(const std::vector<Instance>& instances);
-    void classifyAll(std::vector<Instance>& instance);
+    std::vector<int> classifyAll(std::vector<Instance>& instance);
     void classify(Instance& instance);
     int pruneInstances(int thresh);
 

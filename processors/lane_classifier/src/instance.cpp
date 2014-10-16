@@ -3,7 +3,7 @@
 #include "instance.h"
 #include <cassert>
 
-Instance::Instance(int n, double *f, int l) : label(l), uses(0) {
+Instance::Instance(int n, double *f, int l) : label(l), uses(0), row(0), col(0) {
     this->features = new double[n];
   //std::cout << "Creating"  << (long)this->features << std::endl;
     for (int ii = 0; ii < n; ii++) {
@@ -18,7 +18,7 @@ Instance::Instance(Instance& copy) : label(copy.label), uses(copy.uses) {
       this->features[ii] = copy.features[ii];
     }
 }*/
-Instance::Instance(const Instance& copy) : label(copy.label), uses(copy.uses) {
+Instance::Instance(const Instance& copy) : label(copy.label), uses(copy.uses), row(copy.row), col(copy.col) {
     this->features = new double[2];
   //std::cout << "Copying Const"  << "," << (long)this->features << std::endl;
     for (int ii = 0; ii < 2; ii++) {
@@ -33,6 +33,8 @@ Instance& Instance::operator=( Instance rhs ) {
   this->label = rhs.label;
   this->uses = rhs.uses;
   this->timeToLive = rhs.timeToLive;
+  this->row = rhs.row;
+  this->col = rhs.col;
   double *ftemp = this->features;
   this->features = rhs.features;
   rhs.features = ftemp;

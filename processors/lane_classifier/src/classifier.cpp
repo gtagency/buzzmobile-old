@@ -48,7 +48,8 @@ std::vector<InstAndScore *> Classifier::findKNearest(const double score) {
 //    InstAndScore **kn = new InstAndScore*[this->k];
     //InstAndScore *kn[32];
     //int kninx = 0;
-    if (mid >= 0) {
+//    std::cout << "Score: " << score << ", Mid: " << mid << std::endl;
+    if (mid >= 0 && mid - k >= 0 && mid + k < instances.size()) {
 
         //NOTE: this range will be 1 or 2 bigger than k
         int start = mid - k;
@@ -65,6 +66,9 @@ std::vector<InstAndScore *> Classifier::findKNearest(const double score) {
                 start++;
                 startScore = score - instances[start].score;
             }
+        }
+        for (int ii = start; ii <= end; ii++) {
+          kNearest.push_back(&instances[ii]);
         }
     }
     PROFILER_STOP_FUN(profiler);
@@ -92,7 +96,9 @@ void Classifier::addInstances(const std::vector<Instance>& instances) {
         //TODO: maybe we only need to store the scores...
         InstAndScore ias = {*it, evaluation.score(*it)};
     //    if (scores.find(ias.score) == scores.end()) {
-            this->instances.push_back(ias);
+    //
+//        std::cout << ias.score << "," << it->getLabel() << std::endl;    
+        this->instances.push_back(ias);
         //    scores.insert(ias.score);
       //  }
 //    this->maxLabel = -1;
@@ -123,7 +129,7 @@ std::vector<InstAndScore> Classifier::makeInstAndScore(const std::vector<Instanc
     return out;
 }
 
-void Classifier::classifyAll(std::vector<Instance>& instances) {
+std::vector<int> Classifier::classifyAll(std::vector<Instance>& instances) {
 
 //FIXME: this looks like it was never implemented -- JR, 09/27/14
     PROFILER_START_FUN(profiler);
@@ -138,16 +144,19 @@ void Classifier::classifyAll(std::vector<Instance>& instances) {
         if (scores.find(score) == scores.end()) {
             scores.insert(score);
             labels[score] = doClassify(score); 
+//            std::cout << score << "," << labels[score] << std::endl;
         }
     } 
 
+    std::vector<int> labelVec;
     for (std::vector<InstAndScore>::iterator it = incoming.begin();
          it != incoming.end();
          it++) {
-        it->instance.label = labels[it->score];
+//         std::cout << it->score << "," <<labels[it->score] << std::endl;
+         labelVec.push_back(labels[it->score]);
     } 
-
     PROFILER_STOP_FUN(profiler);
+    return labelVec;
 }
 
 void Classifier::classify(Instance& instance) {
@@ -171,6 +180,7 @@ int Classifier::doClassify(const double score) {
     int maxCount = 0;
     int size = kNearest.size();
 //    std::cout << "Max label: " << this->maxLabel << std::endl;
+//    std::cout << "Score: " << score << ", Size: " << size << std::endl;
     int *histogram = new int[this->maxLabel + 1];
     memset(histogram, 0, (this->maxLabel + 1) * sizeof(int));
     for (int ii = 0; ii < size; ii++) {
