@@ -54,9 +54,9 @@ namespace image {
   }
   
   Instance makeInstance(uchar imgFeatures[2], int label) {
-    PROFILE_FUN(profiler);
+    //PROFILE_FUN(profiler);
     double features[] = {imgFeatures[0], imgFeatures[1]};
-    Instance inst(3, features, label); 
+    Instance inst(2, features, label); 
   #ifdef DEBUG
     cout << "New instance: " << features[0] << ", " << features[1] << ", " << label << endl;
   #endif

@@ -105,6 +105,7 @@ void Classifier::addInstances(const std::vector<Instance>& instances) {
         //FIXME: why not just it->instance.label ?
         f[it->score] = doClassify(it->score);
     }
+    initialized = true;
 //#ifdef DEBUG
     cout << this->instances.size() << " instances" << endl;
 //#endif
@@ -169,7 +170,7 @@ int Classifier::doClassify(const double score) {
     int label = -1;
     int maxCount = 0;
     int size = kNearest.size();
-    std::cout << "Max label: " << this->maxLabel << std::endl;
+//    std::cout << "Max label: " << this->maxLabel << std::endl;
     int *histogram = new int[this->maxLabel + 1];
     memset(histogram, 0, (this->maxLabel + 1) * sizeof(int));
     for (int ii = 0; ii < size; ii++) {

@@ -14,17 +14,17 @@
 #define PROFILER_STOP_FUN(p) p.stopEvent(__FUNCTION__##__pe)
 
 extern class Profiler profiler;
-/*
-#undef PROFILER_START_FUN
-#undef PROFILER_STOP_FUN
+//#undef PROFILE_FUN
+//#undef PROFILER_START_FUN
+//#undef PROFILER_STOP_FUN
 #undef PROFILER_START
 #undef PROFILER_STOP
-
-#define PROFILER_START_FUN(p)
-#define PROFILER_STOP_FUN(p)
+//#define PROFILE_FUN(p)
+//#define PROFILER_START_FUN(p)
+//#define PROFILER_STOP_FUN(p)
 #define PROFILER_START(p,e)
 #define PROFILER_STOP(p,e)
-*/
+
 struct ProfilerEvent {
     const char *name;
     uint64_t start;

@@ -44,13 +44,23 @@ void trainingCallback(const LaneInstanceArray::ConstPtr& training) {
   //TODO: maybe cull/retire old instances
 }
 
-void imageMsgToCvCopy(const sensor_msgs::ImageConstPtr& image, cv_bridge::CvImagePtr& cv_ptr) {
+const std::string& getRosType(int cvType) {
+  switch(cvType) {
+    case CV_8UC3: return enc::BGR8;
+    case CV_8UC1: return enc::MONO8;
+    default:
+      std::stringstream s;
+      s << cvType;
+      throw std::runtime_error("Unrecognized Opencv type [" + s.str() + "]");
+  }
+}
+
+void imageMsgToCvShare(const sensor_msgs::ImageConstPtr& image, cv_bridge::CvImageConstPtr& cv_ptr) {
   try {
-//    if (enc::isColor(image->encoding))
-//      cv_ptr = cv_bridge::toCvShare(image, enc::BGR8);
-//    else
-//      cv_ptr = cv_bridge::toCvShare(image, enc::MONO8);
-    cv_ptr = cv_bridge::toCvCopy(image, enc::BGR8);
+    if (enc::isColor(image->encoding))
+      cv_ptr = cv_bridge::toCvShare(image, enc::BGR8);
+    else
+      cv_ptr = cv_bridge::toCvShare(image, enc::MONO8);
   }
   catch (cv_bridge::Exception& e) {
     ROS_ERROR("cv_bridge exception: %s", e.what());
@@ -62,13 +72,16 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
 
   // Only proceed if we're initialized
   if (!c->isInitialized()) {
+    std::cout << "Classifier not initialized!" << std::endl;
     return;
   } 
-  std::cout << "Image received." << std::endl;
-  cv_bridge::CvImagePtr cv_ptr;
-  imageMsgToCvCopy(image, cv_ptr); 
 
-  Mat& src = cv_ptr->image;
+  PROFILER_START_FUN(profiler);
+  std::cout << "Image received." << std::endl;
+  cv_bridge::CvImageConstPtr cv_ptr;
+  imageMsgToCvShare(image, cv_ptr); 
+
+  Mat src = cv_ptr->image;
  //this classifies back into an image...instead we want to classify into a set of points
  // and then publish the points as a lane or something that can be interpreted as a lane
   Mat marked = Mat(src.size(), src.type());
@@ -81,7 +94,10 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
       cvt = src;
   }
   std::vector<PointInstance> instances;
+  instances.reserve(800*800);
   std::vector<Instance> toClassify;
+  toClassify.reserve(800*800);
+
   std::cout << cvt.type() << std::endl;
   uchar features[2] = {0};
   for(int row = 0; row < cvt.rows; ++row) {
@@ -99,6 +115,7 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
     }
   }
   c->classifyAll(toClassify);
+
   for (std::vector<PointInstance>::iterator it = instances.begin();
        it != instances.end();
        it++) {
@@ -117,7 +134,14 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
       sp->y = 0;
       sp->z = 0;
     }
-  }   
+  } 
+//  std_msgs::Header header;
+ // cv_bridge::CvImage markedImage(header, getRosType(marked.type()), marked);
+
+ // driveable_pub.publish(markedImage.toImageMsg());
+  std::cout << "Finished" << std::endl;
+  PROFILER_STOP_FUN(profiler);
+  profiler.printResults();
 }
 
 int main(int argc, char** argv) {
@@ -133,7 +157,7 @@ int main(int argc, char** argv) {
 
   std::cout << "Lane classifier starting." << std::endl;
   ros::Subscriber sub = n.subscribe<LaneInstanceArray>("road_class_train", 1000, trainingCallback);
-  sub = n.subscribe<sensor_msgs::Image>("image_projected", 1000, imageCallback);
+  ros::Subscriber sub2 = n.subscribe<sensor_msgs::Image>("image_projected", 1, imageCallback);
   driveable_pub = n.advertise<sensor_msgs::Image>("image_driveable", 100);
 //  marker_pub = n.advertise<sen>("image_drivable", 100);
   std::cout << "Lane classifier started." << std::endl;

@@ -6,13 +6,16 @@
 class Instance {
 private:
   int timeToLive;
-  std::vector<double> features;
+  double *features;
 public:
   int label;
 	int uses;
   Instance(int numFeatures, double *features, int label);
-  //  Instance(Instance& copy);
-    //Instance(const Instance& copy);
+//  Instance(Instance& copy);
+  Instance(const Instance& copy);
+  Instance& operator=( Instance rhs );
+
+
   virtual ~Instance();
   double getFeature(unsigned int feature) const;
 

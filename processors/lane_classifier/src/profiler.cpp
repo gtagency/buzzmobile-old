@@ -12,9 +12,16 @@ using namespace std;
 #include "mach/mach_time.h"
 #define TIME mach_absolute_time
 #else
+
 //TODO: replace with clock_gettime
-#include <ctime>
-#define TIME clock
+#include <time.h>
+long nanos() {
+  timespec tp; 
+  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tp);
+  return tp.tv_sec * 1e9 + tp.tv_nsec;
+}
+
+#define TIME nanos
 #endif
 
 Profiler profiler;
