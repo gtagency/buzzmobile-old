@@ -27,7 +27,7 @@ class DifferentialDriveNode:
         msg.rightSpeed = round(wheelSpeeds[0])
         msg.secondsDuration = 0
         msg.acceleration = 0
-        self.traj_publish(msg)
+        self.traj_pub.publish(msg)
 
     def updatePosition(self, pose):
         if self.driver.updatePosition(float(pose.x), float(pose.y), float(pose.theta)):
@@ -37,7 +37,7 @@ class DifferentialDriveNode:
             msg.rightSpeed = round(wheelSpeeds[0])
             msg.secondsDuration = 0
             msg.acceleration = 0
-            self.traj_publish(msg)
+            self.traj_pub.publish(msg)
 
 
 if __name__ == "__main__":
@@ -49,5 +49,5 @@ if __name__ == "__main__":
     toleranceDist = rospy.get_param('toleranceDist', 0)
     toleranceTheta = rospy.get_param('toleranceTheta', 0)
 
-    driver = DifferentialDriveNode(wheelRadius, wheelSeparation, targetV, toleranceDist, toleranceTheta)
-    detector.run()
+    driver = DifferentialDriveNode(wheelRadius, wheelSeparation, speedAdjustment, targetV, toleranceDist, toleranceTheta)
+    driver.run()
