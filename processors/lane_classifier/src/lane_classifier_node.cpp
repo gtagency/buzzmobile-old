@@ -4,6 +4,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include "lane_trainer/LaneInstance.h"
 #include "lane_trainer/LaneInstanceArray.h"
+#include "lane_classifier/LaneLabels.h"
 #include "image.h"
 #include "classifier.h"
 #include "score.h"
@@ -14,7 +15,7 @@ using namespace lane_trainer;
 
 namespace enc = sensor_msgs::image_encodings;
 
-ros::Publisher driveable_pub;
+ros::Publisher labels_pub;
 ros::Publisher marker_pub;
 
 Classifier *c = NULL;
@@ -116,6 +117,20 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
   std::vector<Instance>::iterator it = toClassify.begin();
   std::vector<int>::iterator label = labels.begin();
 
+  lane_classifier::LaneLabels labelsMsg;
+  labelsMsg.width = marked.size().width;
+  labelsMsg.height= marked.size().height;
+
+  //row-order labels, which is what we're putting out already
+//  std::swap(labelsMsg.labels, labels);
+  for (std::vector<int>::iterator it = labels.begin();
+       it != labels.end();
+       it++) {
+    labelsMsg.labels.push_back(*it);
+  }
+  labels_pub.publish(labelsMsg);
+  //markedImage.toImageMsg());
+/*
   for (;
        it != toClassify.end();
        it++, label++) {
@@ -140,6 +155,7 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
   cv_bridge::CvImage markedImage(header, getRosType(marked.type()), marked);
 
   driveable_pub.publish(markedImage.toImageMsg());
+  */
   std::cout << "Finished" << std::endl;
   PROFILER_STOP_FUN(profiler);
   profiler.printResults();
@@ -159,7 +175,8 @@ int main(int argc, char** argv) {
   std::cout << "Lane classifier starting." << std::endl;
   ros::Subscriber sub = n.subscribe<LaneInstanceArray>("road_class_train", 1000, trainingCallback);
   ros::Subscriber sub2 = n.subscribe<sensor_msgs::Image>("image_projected", 1, imageCallback);
-  driveable_pub = n.advertise<sensor_msgs::Image>("image_driveable", 100);
+  //driveable_pub = n.advertise<sensor_msgs::Image>("image_driveable", 100);
+  labels_pub = n.advertise<lane_classifier::LaneLabels>("lane_labels", 100);
 //  marker_pub = n.advertise<sen>("image_drivable", 100);
   std::cout << "Lane classifier started." << std::endl;
   ros::spin();
