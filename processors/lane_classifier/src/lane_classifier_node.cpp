@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
   Evaluation eval;
   eval._data  = data;
   eval._score = score::scoreHueAndSat;
-  c = new Classifier(k, eval);
+  c = new ClusterBasedClassifier(); //(k, eval);
 
   std::cout << "Lane classifier starting." << std::endl;
   ros::Subscriber sub = n.subscribe<LaneInstanceArray>("road_class_train", 1000, trainingCallback);

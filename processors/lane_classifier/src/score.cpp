@@ -3,8 +3,12 @@
 #include "math.h"
 
 namespace score {
-	double dist(double d1, double d2) {
+	double norm(double d1, double d2) {
 	    return sqrt(d1*d1 + d2*d2);
+	}
+	
+  double dist(const Instance& i1, const Instance& i2) {
+      return norm(i1.getFeature(0) - i2.getFeature(0), i1.getFeature(1) - i2.getFeature(1));
 	}
 
 	double scoreHueAndThreshold(const Instance& instance, void *data) {

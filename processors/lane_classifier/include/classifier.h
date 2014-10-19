@@ -33,6 +33,17 @@ public:
 };
 
 class Classifier {
+public:
+
+    virtual void addInstances(const std::vector<Instance>& instances) = 0;
+    virtual std::vector<int> classifyAll(std::vector<Instance>& instance) = 0;
+    virtual void classify(Instance& instance) = 0;
+    virtual int pruneInstances(int thresh) = 0;
+
+    virtual bool isInitialized() = 0;
+};
+
+class KNNClassifier : public Classifier {
 private:
     int k;
     const Evaluation& evaluation;
@@ -48,14 +59,32 @@ private:
     int doClassify(const double score);
 
 public:
+    KNNClassifier(int k, const Evaluation& evaluation); 
 
-    Classifier(int k, const Evaluation& evaluation); 
+    virtual void addInstances(const std::vector<Instance>& instances);
+    virtual std::vector<int> classifyAll(std::vector<Instance>& instance);
+    virtual void classify(Instance& instance);
+    virtual int pruneInstances(int thresh);
 
-    void addInstances(const std::vector<Instance>& instances);
-    std::vector<int> classifyAll(std::vector<Instance>& instance);
-    void classify(Instance& instance);
-    int pruneInstances(int thresh);
+    virtual bool isInitialized();
+};
 
-    bool isInitialized();
+
+class ClusterBasedClassifier : public Classifier {
+private:
+  long numUpdates;
+  std::map<int, Instance> cluster_centers;
+
+  std::vector<std::vector<Instance> > splitByLabel(const std::vector<Instance>& instances);
+
+  Instance computeAverageFeatures(const std::vector<Instance>& instances);
+  Instance average(const Instance& oldInst, const Instance& newInst, long count);
+
+public:
+    virtual void addInstances(const std::vector<Instance>& instances);
+    virtual std::vector<int> classifyAll(std::vector<Instance>& instances);
+    virtual void classify(Instance& instance);
+    virtual int pruneInstances(int thresh);
+    virtual bool isInitialized();
 };
 #endif //__CLASSIFIER_H

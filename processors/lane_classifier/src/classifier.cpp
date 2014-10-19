@@ -11,12 +11,12 @@
 #include "profiler.h"
 using namespace std;
 
-Classifier::Classifier(int k, const Evaluation& evaluation) : k(k), evaluation(evaluation), initialized(false), maxLabel(0) {}
+KNNClassifier::KNNClassifier(int k, const Evaluation& evaluation) : k(k), evaluation(evaluation), initialized(false), maxLabel(0) {}
 
 //binary search to find a match, or find the point where a match would be
 // (where min crosses over max)
 /* private */
-int Classifier::findClosestIndex(const double score) const {
+int KNNClassifier::findClosestIndex(const double score) const {
 
     //first, find the closest
     PROFILER_START_FUN(profiler);
@@ -40,7 +40,7 @@ int Classifier::findClosestIndex(const double score) const {
 }
 
 /* private */
-std::vector<InstAndScore *> Classifier::findKNearest(const double score) {
+std::vector<InstAndScore *> KNNClassifier::findKNearest(const double score) {
 //    cout << "DONE: " << min << ", " << mid << ", " << max << ", " << instances.size() << endl;
     int mid = findClosestIndex(score);
     PROFILER_START_FUN(profiler);
@@ -79,7 +79,7 @@ int sortInstances(const InstAndScore& a, const InstAndScore& b) {
     return a.score - b.score < 0;
 }
 
-void Classifier::addInstances(const std::vector<Instance>& instances) {
+void KNNClassifier::addInstances(const std::vector<Instance>& instances) {
     std::set<int> scores;
     //TODO: as per Nick's suggestion, perhaps we can learn the function
     // <I,L> (e.g. train a neural network or SVM).  Classifying is then
@@ -117,7 +117,7 @@ void Classifier::addInstances(const std::vector<Instance>& instances) {
 //#endif
 }
 
-std::vector<InstAndScore> Classifier::makeInstAndScore(const std::vector<Instance>& instances) {
+std::vector<InstAndScore> KNNClassifier::makeInstAndScore(const std::vector<Instance>& instances) {
     std::vector<InstAndScore> out;
     for (std::vector<Instance>::const_iterator it = instances.begin();
          it !=instances.end();
@@ -129,7 +129,7 @@ std::vector<InstAndScore> Classifier::makeInstAndScore(const std::vector<Instanc
     return out;
 }
 
-std::vector<int> Classifier::classifyAll(std::vector<Instance>& instances) {
+std::vector<int> KNNClassifier::classifyAll(std::vector<Instance>& instances) {
 
 //FIXME: this looks like it was never implemented -- JR, 09/27/14
     PROFILER_START_FUN(profiler);
@@ -159,7 +159,7 @@ std::vector<int> Classifier::classifyAll(std::vector<Instance>& instances) {
     return labelVec;
 }
 
-void Classifier::classify(Instance& instance) {
+void KNNClassifier::classify(Instance& instance) {
 
     PROFILE_FUN(profiler);
     double score = evaluation.score(instance);
@@ -171,7 +171,7 @@ void Classifier::classify(Instance& instance) {
 }
 
 /* private */
-int Classifier::doClassify(const double score) {
+int KNNClassifier::doClassify(const double score) {
     
     std::vector<InstAndScore *> kNearest = findKNearest(score);
     PROFILER_START(profiler, mostFrequentLabel);
@@ -198,7 +198,7 @@ int Classifier::doClassify(const double score) {
 }
 
 
-int Classifier::pruneInstances(int thresh) {
+int KNNClassifier::pruneInstances(int thresh) {
   std::vector<InstAndScore> newVec;
   for (std::vector<InstAndScore>::iterator it = this->instances.begin();
        it != this->instances.end();
@@ -212,6 +212,6 @@ int Classifier::pruneInstances(int thresh) {
   return newVec.size();
 }
 
-bool Classifier::isInitialized() {
+bool KNNClassifier::isInitialized() {
   return initialized;
 }

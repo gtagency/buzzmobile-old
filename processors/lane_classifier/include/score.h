@@ -4,6 +4,7 @@
 #include "instance.h"
 
 namespace score {
+  double dist(const Instance& i1, const Instance& i2);
 	double scoreHueAndSat(const Instance& instance, void *data);
 }
 
