@@ -71,12 +71,12 @@ def successors(img, state, carWidth):
     return successors
 
 def checkSurroundings(img, pos, carWidth):
-    if not img[y][x]:
+    if not img[y][x] == 1:
         return False
     r = carWidth/2
     t = 0
     while t < 2 * math.pi:
-        if not img[r*math.sin(t)+pos[1]][r*math.cos(t)+pos[0]]:
+        if not img[r*math.sin(t)+pos[1]][r*math.cos(t)+pos[0]] == 1:
             return False
         t += math.pi /4
     return True

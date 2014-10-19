@@ -5,7 +5,7 @@ import planner_astar
 import math
 from geometry_msgs.msg import Pose2D
 from driver_differential.msg import Path
-from sensor_msgs.msg import Image
+from lane_classifier.msg import LaneLabels
 
 class PlannerNode:
     def __init__(pixelToMeter):
@@ -13,7 +13,7 @@ class PlannerNode:
         self.carWidth = carWidth
         self.path_pub = rospy.Publisher("planned_path", Path)
         rospy.Subscriber("car_position", Pose2D, self.updatePosition)
-        rospy.Subscriber("image_driveable", Image, self.updatePlan)
+        rospy.Subscriber("image_driveable", LaneLabels, self.updatePlan)
         self.posX = 0
         self.posY = 0
         self.posTheta = 0
@@ -39,7 +39,7 @@ class PlannerNode:
     def convertImageToArray(self, img):
         height = img.height
         width = img.width
-        arr = [imd.data[i*width:i*width+width] for i in range(height)]
+        arr = [img.labels[i*width:i*width+width] for i in range(height)]
 
     def convertPathToWorldFrame(self, path):
         newPath = []
