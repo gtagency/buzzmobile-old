@@ -8,9 +8,20 @@
 #include <memory>
 
 ros::Publisher pub;
+ros::Publisher img_pub;
 
 namespace enc = sensor_msgs::image_encodings;
 
+const std::string& getRosType(int cvType) {
+  switch(cvType) {
+    case CV_8UC3: return enc::BGR8;
+    case CV_8UC1: return enc::MONO8;
+    default:
+      std::stringstream s;
+      s << cvType;
+      throw std::runtime_error("Unrecognized Opencv type [" + s.str() + "]");
+  }
+}
 void imageMsgToCvCopy(const sensor_msgs::Image::ConstPtr& image, cv_bridge::CvImageConstPtr& cv_ptr) {
   try {
     if (enc::isColor(image->encoding))
@@ -157,6 +168,10 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
 
   pub.publish(lanes);
 
+  std_msgs::Header header;
+  cv_bridge::CvImage trainerImage(header, getRosType(projectedImage.type()), projectedImage);
+
+  img_pub.publish(trainerImage.toImageMsg());
   //std::cout << roadPts.size() << std::endl;
 
 //  cv::imshow("threshImg", threshImg);
@@ -175,6 +190,7 @@ int main(int argc, char *argv[]) {
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe<sensor_msgs::Image>("image_projected", 1, generateTrainingSet);
   pub = n.advertise<lane_trainer::LaneInstanceArray>("road_class_train", 1000);
+  img_pub = n.advertise<sensor_msgs::Image>("image_trainer", 1000);
 
   std::cout << "Lane trainer started." << std::endl;
   ros::spin();
