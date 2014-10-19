@@ -63,7 +63,7 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
 //  cv::imshow("gaussianBlur", gauss);
   cv::medianBlur(projectedImage, median, 7);
 
-  cv::imshow("medianBlur", median);
+  //cv::imshow("medianBlur", median);
  
   projectedImage = median; //gauss; 
   cv::Mat slice(projectedImage, cv::Rect(0, SLICE_Y, projectedImage.cols, 1));
@@ -159,11 +159,11 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
 
   //std::cout << roadPts.size() << std::endl;
 
-  cv::imshow("threshImg", threshImg);
-  cv::imshow("sobelImg", sobelImg);
+//  cv::imshow("threshImg", threshImg);
+//  cv::imshow("sobelImg", sobelImg);
   
-  cv::imshow("projectedImage", projectedImage);
-  cv::waitKey();
+//  cv::imshow("projectedImage", projectedImage);
+//  cv::waitKey();
 }
 
 int main(int argc, char *argv[]) {
