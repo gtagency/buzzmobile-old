@@ -1,7 +1,7 @@
 import Queue
 import math
 
-def planPath(img):
+def planPath(img, carWidth):
     pq = Queue.PriorityQueue()
     # x, y, theta
     start = (len(img[0]) / 2, len(img), 0)
@@ -23,7 +23,7 @@ def planPath(img):
             if score > best[1]:
                 best = (state, score)
 
-            for successor in successors(img, state):
+            for successor in successors(img, state, carWidth):
                 newCost = cost + 1
                 pq.put((heuristic(img, state) + newCost, newCost, state))
 
@@ -42,7 +42,7 @@ def stateScore(img, state):
 def heuristic(img, state):
     return state[1]
 
-def successors(img, state):
+def successors(img, state, carWidth):
     # Turning angles
     thetas = [math.pi/6, math.pi/3]
     # 10 pixels at a time
@@ -65,9 +65,21 @@ def successors(img, state):
         newX = math.cos(t) * dx - math.sin(t) * dy + state[0]
         newY = math.sin(t) * dx + math.cos(t) * dy + state[1]
         newTheta = (t + dtheta) % (2 * math.pi)
-        if newX < len(img[0]) and newX > 0 and newY < len(img) and newY > 0 and img[newY][newX]:
+        if newX < len(img[0]) and newX > 0 and newY < len(img)
+                and newY > 0 and check(img, (newX, newY), carWidth):
             successors.append((newX, newY, newTheta))
     return successors
+
+def checkSurroundings(img, pos, carWidth):
+    if not img[y][x]:
+        return False
+    r = carWidth/2
+    t = 0
+    while t < 2 * math.pi:
+        if not img[r*math.sin(t)+pos[1]][r*math.cos(t)+pos[0]]:
+            return False
+        t += math.pi /4
+    return True
 
 def reconstructPath(parents, state):
     path = [state]

@@ -10,6 +10,7 @@ from sensor_msgs.msg import Image
 class PlannerNode:
     def __init__(pixelToMeter):
         self.pixelToMeter = pixelToMeter
+        self.carWidth = carWidth
         self.path_pub = rospy.Publisher("planned_path", Path)
         rospy.Subscriber("car_position", Pose2D, self.updatePosition)
         rospy.Subscriber("image_driveable", Image, self.updatePlan)
@@ -24,7 +25,7 @@ class PlannerNode:
 
     def updatePlan(self, img):
         img = convertImageToArray(img)
-        path = planner_astar.planPath(img)
+        path = planner_astar.planPath(img, self.carWidth/self.pixelToMeter)
         path = convertPathToWorldFrame(path)
         msg = Path()
         msg.poses = path
@@ -58,6 +59,7 @@ class PlannerNode:
 
 if __name__ == "__main__":
     pixelToMeter = rospy.get_param('pixelToMeter', 1)
+    carWidth = rospy.get_param('carWidth', 1)
 
-    planner = PlannerNode(pixelToMeter)
+    planner = PlannerNode(pixelToMeter, carWidth)
     planner.run()
