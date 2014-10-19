@@ -47,7 +47,7 @@ void addPointsToInstanceArray(const std::set<cv::Vec3b,Vec3bCompare>& pts, int l
 #define YELLOW_LOW  cv::Scalar(0,150,200)
 #define YELLOW_HIGH cv::Scalar(120,255,255)
 #define GREEN_LOW   cv::Scalar(70,80,40)
-#define GREEN_HIGH  cv::Scalar(156,168,117)
+#define GREEN_HIGH  cv::Scalar(220,255,135)
 void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
 
  //std::cout << "Image received" << std::endl;
@@ -58,8 +58,14 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
   projectedImage = cv_ptr->image;
 
   const int SLICE_Y = 1*(projectedImage.rows/6);
-  cv::GaussianBlur(projectedImage, projectedImage, cv::Size(0, 0), 1, 0);
+  cv::Mat gauss, median;
+//  cv::GaussianBlur(projectedImage, gauss, cv::Size(0, 0), 1, 0);
+//  cv::imshow("gaussianBlur", gauss);
+  cv::medianBlur(projectedImage, median, 7);
 
+  //cv::imshow("medianBlur", median);
+ 
+  projectedImage = median; //gauss; 
   cv::Mat slice(projectedImage, cv::Rect(0, SLICE_Y, projectedImage.cols, 1));
   
   cv::Mat HSVSlice;
@@ -68,10 +74,22 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
   cv::inRange(slice, GREEN_LOW, GREEN_HIGH, threshImg);
   //cv::inRange(slice, cv::Scalar(45, 255, 0), cv::Scalar(60, 135, 255), threshImg);
 
+  slice.convertTo(slice, CV_16S);
   cv::Sobel(slice, sobelImg, -1, 1, 0);
+ // cv::Mat detectedEdges;
+
+ // sobelImg = cv::abs(sobelImg);
+  sobelImg.convertTo(sobelImg, CV_8U);
+
+ // int threshold = 50;
+//  cv::Canny(slice, detectedEdges, threshold, threshold * 3, 3);
+ // sobelImg = cv::Scalar::all(0);
+ // slice.copyTo(sobelImg, detectedEdges);
+
   cv::cvtColor(sobelImg, sobelImg, CV_BGR2GRAY);
   cv::threshold(sobelImg, sobelImg, 100, 255, cv::THRESH_BINARY);
 
+  //sobelImg = sobelImg + threshImg;
   //cv::imshow("Sobel", sobelImg);
 
   int leftEdge = -1;
@@ -140,12 +158,12 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
   pub.publish(lanes);
 
   //std::cout << roadPts.size() << std::endl;
-/*
-  cv::imshow("threshImg", threshImg);
-  cv::imshow("sobelImg", sobelImg);
+
+//  cv::imshow("threshImg", threshImg);
+//  cv::imshow("sobelImg", sobelImg);
   
-  cv::imshow("projectedImage", projectedImage);
-  cv::waitKey();*/
+//  cv::imshow("projectedImage", projectedImage);
+//  cv::waitKey();
 }
 
 int main(int argc, char *argv[]) {
