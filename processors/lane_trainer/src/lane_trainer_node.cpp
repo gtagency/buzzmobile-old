@@ -143,10 +143,10 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
       }
     }
   }
-  std::cout << center << std::endl;
-  std::cout << leftEdge << std::endl;
-  std::cout << rightEdge << std::endl;
-  std::cout << slice.cols/2 << std::endl;
+//  std::cout << center << std::endl;
+ // std::cout << leftEdge << std::endl;
+ // std::cout << rightEdge << std::endl;
+ // std::cout << slice.cols/2 << std::endl;
 /*
   bool stop = false;
   for (int i = center + 2; i < slice.cols; ++i) {

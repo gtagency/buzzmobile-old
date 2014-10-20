@@ -1,0 +1,18 @@
+<package>
+  <description brief="lane_extractor">
+
+     lane_extractor
+
+  </description>
+  <author>Jesse Rosalia</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/lane_extractor</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="sensor_msgs"/>
+  <depend package="lane_classifier"/>
+
+</package>
+
+
