@@ -28,6 +28,8 @@ void laneLabelsCallback(const lane_classifier::LaneLabelsConstPtr& labelMsg) {
   Size size(labelMsg->width, labelMsg->height);
   Mat marked = Mat(size, CV_8UC1);
   int ii = 0;
+  int onVal = 255; //value to indicate pixel is on in binary image
+
   UF uf(labelMsg->width*labelMsg->height);
   int driveableLabel = 1;
   for (std::vector<unsigned char>::const_iterator it = labelMsg->labels.begin();
@@ -57,17 +59,18 @@ void laneLabelsCallback(const lane_classifier::LaneLabelsConstPtr& labelMsg) {
     int row = output[ii] / labelMsg->width;
     int col = output[ii] % labelMsg->height;
 
-    compo.ptr<uchar>(row)[col] = 255; 
+    compo.ptr<uchar>(row)[col] = onVal; 
   } 
   delete [] output;
-  std_msgs::Header header;
-  cv_bridge::CvImage compImage(header, getRosType(compo.type()),compo);
-
-  comp_img_pub.publish(compImage.toImageMsg());
-
   std::vector<std::vector<Point> > contours;
   findContours(compo, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
   std::vector<Point> compPoints = contours.front();
+  Mat stuff = Mat::zeros(size, CV_8UC1);
+  drawContours(stuff, contours, 0, Scalar(onVal), CV_FILLED);
+  std_msgs::Header header;
+  cv_bridge::CvImage compImage(header, getRosType(stuff.type()),stuff);
+
+  comp_img_pub.publish(compImage.toImageMsg());
 
   lane_classifier::LaneLabels newLabelMsg;
 
@@ -75,16 +78,25 @@ void laneLabelsCallback(const lane_classifier::LaneLabelsConstPtr& labelMsg) {
   newLabelMsg.width = labelMsg->width;
   newLabelMsg.height = labelMsg->height;
   newLabelMsg.labels.reserve(labelMsg->width * labelMsg->height);
+  for (int row = 0; row < labelMsg->height; row++) {
+    for (int col = 0; col < labelMsg->width; col++) {
+     newLabelMsg.labels.push_back(stuff.ptr<uchar>(row)[col] == onVal ? 1 : 0);
+    }
+  }
+  /*
   for (int ii = 0; ii < labelMsg->width * labelMsg->height; ii++) {
     newLabelMsg.labels.push_back(0);
   }
+  
   std::cout << newLabelMsg.labels.size() << std::endl;
   for (std::vector<Point>::iterator it = compPoints.begin();
        it != compPoints.end();
        it++) {
     int inx = it->y * labelMsg->width + it->x;
     newLabelMsg.labels[inx] = 1;
-  }
+  }*/
+
+  std::cout << newLabelMsg.labels.size() << std::endl;
 //  cv::waitKey();
   labels_ex_pub.publish(newLabelMsg);
   std::cout << "Image Published" << std::endl;
