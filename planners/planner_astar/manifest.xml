@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/planner_astar</url>
   <depend package="rospy"/>
+  <depend package="std_msgs"/>
   <depend package="geometry_msgs"/>
   <depend package="driver_differential"/>
   <depend package="lane_classifier"/>
