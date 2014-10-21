@@ -5,6 +5,7 @@ import differential_driver
 from geometry_msgs.msg import Pose2D
 from corobot_msgs.msg import MotorCommand
 from driver_differential.msg import Path
+from std_msgs.msg import Bool
 
 class DifferentialDriveNode:
     def __init__(wheelRadius, wheelSeparation, speedAdjustment, targetV, toleranceDist, toleranceTheta):
@@ -13,31 +14,44 @@ class DifferentialDriveNode:
         self.traj_pub = rospy.Publisher("PhidgetMotor", MotorCommand)
         rospy.Subscriber("car_position", Pose2D, self.updatePosition)
         rospy.Subscriber("planned_path", Path, self.updatePlan)
-
+        rospy.Subscriber("running_flag", Bool, self.setDriveFlag)
+        self.run_flag = False
 
     def run(self):
         r = rospy.Rate(25)
         while not rospy.is_shutdown():
             r.sleep()
 
-    def updatePlan(self, plan):
-        wheelSpeeds = self.driver.updatePlan(list(plan.waypoints))
-        msg = MotorCommand()
-        msg.leftSpeed = round(wheelSpeeds[0])
-        msg.rightSpeed = round(wheelSpeeds[0])
-        msg.secondsDuration = 0
-        msg.acceleration = 0
-        self.traj_pub.publish(msg)
+    def setDriveFlag(self, flag):
+        self.run_flag = flag.data
+        if not flag.data:
+            msg = MotorCommand()
+            msg.leftSpeed = 0
+            msg.rightSpeed = 0
+            msg.secondsDuration = 0
+            msg.acceleration = 0
+            traj_pub.publish(msg))
 
-    def updatePosition(self, pose):
-        if self.driver.updatePosition(float(pose.x), float(pose.y), float(pose.theta)):
-            wheelSpeeds = driver.makeTrajectory()
+    def updatePlan(self, plan):
+        if self.run_flag:
+            wheelSpeeds = self.driver.updatePlan(list(plan.waypoints))
             msg = MotorCommand()
             msg.leftSpeed = round(wheelSpeeds[0])
             msg.rightSpeed = round(wheelSpeeds[0])
             msg.secondsDuration = 0
-            msg.acceleration = 0
+            msg.acceleration = 100
             self.traj_pub.publish(msg)
+
+    def updatePosition(self, pose):
+        if self.driver.updatePosition(float(pose.x), float(pose.y), float(pose.theta)):
+            if self.run_flag:
+                wheelSpeeds = driver.makeTrajectory()
+                msg = MotorCommand()
+                msg.leftSpeed = round(wheelSpeeds[0])
+                msg.rightSpeed = round(wheelSpeeds[0])
+                msg.secondsDuration = 0
+                msg.acceleration = 0
+                self.traj_pub.publish(msg)
 
 
 if __name__ == "__main__":

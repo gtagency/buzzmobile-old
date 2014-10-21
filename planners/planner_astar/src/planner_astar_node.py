@@ -6,6 +6,7 @@ import math
 from geometry_msgs.msg import Pose2D
 from driver_differential.msg import Path
 from lane_classifier.msg import LaneLabels
+from std_msgs.msg import Bool
 
 class PlannerNode:
     def __init__(pixelToMeter):
@@ -14,22 +15,32 @@ class PlannerNode:
         self.path_pub = rospy.Publisher("planned_path", Path)
         rospy.Subscriber("car_position", Pose2D, self.updatePosition)
         rospy.Subscriber("image_driveable", LaneLabels, self.updatePlan)
+        rospy.Subscriber("running_flag", Bool, self.setDriveFlag)
         self.posX = 0
         self.posY = 0
         self.posTheta = 0
+        self.run_flag = False
 
     def run(self):
         r = rospy.Rate(25)
         while not rospy.is_shutdown():
             r.sleep()
 
+    def setDriveFlag(self, flag):
+        self.run_flag = flag.data
+        if not flag.data:
+            msg = Path()
+            msg.poses = []
+            path_pub.publish(msg)
+
     def updatePlan(self, img):
-        img = convertImageToArray(img)
-        path = planner_astar.planPath(img, self.carWidth/self.pixelToMeter)
-        path = convertPathToWorldFrame(path)
-        msg = Path()
-        msg.poses = path
-        self.path_pub.publish(msg)
+        if self.run_flag:
+            img = convertImageToArray(img)
+            path = planner_astar.planPath(img, self.carWidth/self.pixelToMeter)
+            path = convertPathToWorldFrame(path)
+            msg = Path()
+            msg.poses = path
+            self.path_pub.publish(msg)
 
     def updatePosition(self, pose):
         self.posX = pose.x
