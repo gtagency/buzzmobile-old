@@ -1,0 +1,12 @@
+<package>
+  <description brief="car_interface">
+    car_interface
+  </description>
+  <author>Matthew Barulic</author>
+  <license>BSD</license>
+  
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="car_msgs"/>
+  
+</package>
