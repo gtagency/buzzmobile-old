@@ -1,4 +1,5 @@
-#include <Arduino.h>
+#ifndef __PDCONTROLLER_H
+#define __PDCONTROLLER_H
 
 class PDController {
 public:
@@ -56,6 +57,7 @@ private:
   float output;
   float maxVal;
   float minVal;
-  boolean clampValues;
+  bool clampValues;
 };
 
+#endif //__PDCONTROLLER_H

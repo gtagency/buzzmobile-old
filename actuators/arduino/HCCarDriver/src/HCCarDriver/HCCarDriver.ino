@@ -1,8 +1,9 @@
+#include <Arduino.h>
 #include <Servo.h>
 #include "pid.h"
 #include <stdio.h>
 
-#define STX ((char)2)
+#define STX ((char)'$')
 
 const int motor_pin = 3;
 const int steer_pin = 5;
@@ -40,7 +41,7 @@ float getSpeed() {
   lastTime = millis();
   float measured = 0;
   if(dTime > 0.001) {
-    float measured = ((ticks / ticksPerRev) * wheelCirc) / dTime;
+    measured = ((ticks / ticksPerRev) * wheelCirc) / dTime;
     ticks = 0;
   }
   return measured;
@@ -86,19 +87,18 @@ void setup() {
 }
 
 void loop() {
+  char retMsg[6] = {0};
   while(Serial.available()) {
     if(Serial.read() == STX) {
       speedController.setDesiredValue(Serial.parseFloat());
       steerController.setDesiredValue(Serial.parseFloat());
       lastCmdTime = millis();
-      char *retMsg = new char[6];
       retMsg[0] = STX;
       sprintf(retMsg+1, "%05i", count);
       Serial.println(retMsg);
       count = 0;
     }
   }
-  
   
   speedController.update(getSpeed());
   motor.write(speedController.getOutput());
@@ -116,7 +116,7 @@ void loop() {
   
   if(millis() - lastCmdTime > 500) {
     digitalWrite(led_pin, HIGH);
-    stopAll();
+    //stopAll();
   } else {
     digitalWrite(led_pin, LOW);
   }
