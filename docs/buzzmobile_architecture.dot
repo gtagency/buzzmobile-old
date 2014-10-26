@@ -1,0 +1,34 @@
+digraph buzzmobile {
+    node [shape = circle] camera [rank="source"];
+    node [shape = circle] lidar [rank="source"];
+    node [shape = circle] depth_camera [rank="source"];
+    node [shape = circle] odom [rank="source"];
+    node [shape = circle] imu [rank="source"];
+    node [shape = circle] projection;
+    node [shape = circle] lane_trainer;
+    node [shape = circle] lane_classifier;
+    node [shape = circle] world_model;
+    node [shape = circle] localizer;
+    node [shape = circle] obstacles;
+    node [shape = circle] planner;
+    node [shape = circle] driver;
+    node [shape = circle] brake;
+    node [shape = circle] teleop;
+    node [shape = circle] car_interface;
+    camera -> projection [label="/PTZ/image_raw"]
+    projection -> lane_trainer [label="/PTZ/image_projected"]
+    projection -> lane_classifier [label="/PTZ/image_projected"]
+    lane_trainer -> lane_classifier [label="/road_class_train"]
+    lane_classifier -> world_model [label="/lane_labels"]
+    lidar -> obstacles [label="/scan"]
+    obstacles -> world_model [label="/obstacles"]
+    world_model -> planner [label="/drivable"]
+    odom -> localizer [label="/encoder_odom"]
+    imu -> localizer [label="/angles"]
+    planner -> driver [label="/planned_path"]
+    driver -> car_interface [label="/motion_command"]
+    teleop -> car_interface [label="/motion_command"]
+    brake -> driver [label="/brake"]
+    teleop -> driver [label="/brake"]
+ 
+}
