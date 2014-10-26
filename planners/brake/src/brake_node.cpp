@@ -10,7 +10,6 @@
 
 #include "bicycle_model/bicycle_model_calculations.h"
 
-bool brake;
 ros::Publisher brake_pub;
 
 core_msgs::Pose2DAndVelStamped currentPoseAndVel;
@@ -36,10 +35,11 @@ void obstacleCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& msg) {
          jt != it->polygons.end();
          jt++) {
       if (hitTest(*jt, testPt)) {
-        brake = true;
+        //NOTE: this node only publishes true.  It's up to another node (such as the teleop node) to clear the flag.
         std_msgs::Bool msg;
-        msg.data = brake;
+        msg.data = true;
         brake_pub.publish(msg);
+        break;
       }
     }
   }
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 
   ros::Subscriber s = n.subscribe<core_msgs::ObstacleArrayStamped>("obstacles", 100, obstacleCallback);
   ros::Subscriber s2 = n.subscribe<core_msgs::Pose2DAndVelStamped>("car_pos_and_vel", 100, carPosAndVelCallback);
-  brake_pub = n.advertise<std_msgs::Bool>("brake", 1000);
+  brake_pub = n.advertise<std_msgs::Bool>("brake", 1000, true);
 
   ros::spin();
   return 0;
