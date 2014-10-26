@@ -4,7 +4,7 @@ import rospy
 import planner_astar
 import math
 from geometry_msgs.msg import Pose2D
-from driver_differential.msg import Path
+from planner_astar.msg import Path
 from lane_classifier.msg import LaneLabels
 from std_msgs.msg import Bool
 

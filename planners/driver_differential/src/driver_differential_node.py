@@ -4,7 +4,7 @@ import rospy
 import differential_driver
 from geometry_msgs.msg import Pose2D
 from corobot_msgs.msg import MotorCommand
-from driver_differential.msg import Path
+from planner_astar.msg import Path
 from std_msgs.msg import Bool
 
 class DifferentialDriveNode:
