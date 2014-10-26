@@ -22,7 +22,7 @@ ros::ServiceClient resetArm_client;
 //
 ros::Publisher motion_pub;
 ros::Publisher horn_pub;
-int maxFwdSpeed = 2.5; //m/s
+int maxFwdSpeed = 1; //m/s
 int pubFreq     = 10; //hz
 
 bool obstacleFlag = false;
@@ -45,6 +45,7 @@ void handleDrive(const sensor_msgs::Joy::ConstPtr& joy);
 void handleManualToggle(const sensor_msgs::Joy::ConstPtr& joy);
 void handleTurn(const sensor_msgs::Joy::ConstPtr& joy);
 void handleHorn(const sensor_msgs::Joy::ConstPtr& joy);
+void handleBrake(const sensor_msgs::Joy::ConstPtr& joy);
 
 void honkHorn(); 
 void sendMotionCommand();
