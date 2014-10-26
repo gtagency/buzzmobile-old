@@ -1,0 +1,14 @@
+<package>
+  <description brief="localizer_dead_reckoning">
+
+     localizer_dead_reckoning
+
+  </description>
+  <author>viki</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/localizer_dead_reckoning</url>
+
+</package>
+
+
