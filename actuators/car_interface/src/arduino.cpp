@@ -1,7 +1,7 @@
 #include <rosconsole/macros_generated.h>
 #include <ros/console.h>
 #include <ros/init.h>
-#include "car/arduino.h"
+#include "arduino.h"
 
 using namespace std;
 
@@ -15,11 +15,16 @@ Arduino::Arduino()
 
 void Arduino::open(string path, unsigned int baudrate)
 {
-  ROS_INFO("Opening Arduino serial port...");
+  ROS_INFO("Opening Arduino serial port %s...", path.c_str());
+  device_path = path;
   try {
     port.open(device_path);
-  } catch (...) {
-    ROS_ERROR("Failed to open serial port %s", device_path.c_str());
+
+   } catch(boost::system::system_error& e)
+    {
+        ROS_ERROR("Failed to open serial port %s", device_path.c_str());
+        ROS_ERROR("Error: %s", e.what());
+        ROS_ERROR("Info: %s", boost::diagnostic_information(e).c_str());
   }
 
   if(port.is_open()) {
@@ -48,13 +53,14 @@ Arduino::~Arduino() {
 void Arduino::write_run() {
   while(threads_running) {
     stringstream command;
+    ROS_INFO("%f, %f", speed, steer);
     command << STX << speed << ',' << steer << '\n';
     try {
       boost::asio::write(port, boost::asio::buffer(command.str().c_str(), command.str().length()));
     } catch(...) {
       ROS_ERROR("An error occurred while writing to %s.", device_path.c_str());
     }
-    usleep(10000);
+    usleep(50000);
   }
 }
 
