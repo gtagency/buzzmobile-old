@@ -1,0 +1,14 @@
+<package>
+  <description brief="driver_bicycle">
+
+     driver_bicycle
+
+  </description>
+  <author>viki</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/driver_bicycle</url>
+
+</package>
+
+
