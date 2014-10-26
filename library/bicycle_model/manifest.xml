@@ -12,6 +12,9 @@
   <depend package="rospy"/>
   <depend package="geometry_msgs"/>
 
+  <export>
+       <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export>
 </package>
 
 

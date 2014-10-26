@@ -8,6 +8,8 @@
 #include <core_msgs/Obstacle.h>
 #include <core_msgs/Pose2DAndVelStamped.h>
 
+#include "bicycle_model/bicycle_model_calculations.h"
+
 bool brake;
 ros::Publisher brake_pub;
 

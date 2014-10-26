@@ -1,5 +1,5 @@
 
-#include "bicycle_model_calculations.h"
+#include "bicycle_model/bicycle_model_calculations.h"
 
 geometry_msgs::Vector3 changePosition(double linearVel, double steerAngle, double timeSecs, double carLength) {
   return forwardKinematics(linearVel, angularVelocity(linearVel, steerAngle, carLength), timeSecs);
