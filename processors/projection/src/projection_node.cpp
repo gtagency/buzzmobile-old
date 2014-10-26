@@ -3,42 +3,20 @@
 #include <std_msgs/Header.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
-#include <cv_bridge/cv_bridge.h>
 #include "balance.hpp"
 
 #include "projection.h"
+#include "image_lib/image_lib.h" //include cv_bridge
+
+using namespace image_lib;
 
 ros::Publisher proj_pub;
-
-namespace enc = sensor_msgs::image_encodings;
-
-const std::string& getRosType(int cvType) {
-  switch(cvType) {
-    case CV_8UC3: return enc::BGR8;
-    case CV_8UC1: return enc::MONO8;
-    default:
-      std::stringstream s;
-      s << cvType;
-      throw std::runtime_error("Unrecognized Opencv type [" + s.str() + "]");
-  }
-}
 
 //NOTE: values copied from Nick's original code, hand tuned to Eleanor.
 proj::ProjectionParams *params = NULL;
 void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
   cv_bridge::CvImageConstPtr cv_ptr;
-  try {
-    if (enc::isColor(image->encoding))
-      cv_ptr = cv_bridge::toCvShare(image, enc::BGR8);
-    else
-      cv_ptr = cv_bridge::toCvShare(image, enc::MONO8);
-//    cv_ptr = cv_bridge::toCvCopy(image, enc::BGR8);
-  }
-  catch (cv_bridge::Exception& e) {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
-  }
-
+  imageMsgToCvShare(image, cv_ptr);
   cv::Mat proj;
   proj::groundTransformProj(cv_ptr->image, *params, proj);
   balance::grayWorld(proj, proj);
