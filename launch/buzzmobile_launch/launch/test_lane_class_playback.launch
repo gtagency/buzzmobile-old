@@ -1,0 +1,45 @@
+<launch>
+    <node pkg="projection" name="frontCam_proj" type="projection_node" ns="PTZ">
+        <param name="ground_z_dim" value="3.5365"/>
+    </node>
+
+    <node pkg="lane_trainer" name="lane_trainer" type="lane_trainer_node">
+        <remap from="image_projected" to="/PTZ/image_projected"/>
+    </node>
+
+    <node pkg="lane_classifier" name="lane_classifier" type="lane_classifier_node">
+        <remap from="image_projected" to="/PTZ/image_projected"/>
+    </node>
+
+    <node pkg="lane_extractor" name="lane_extractor" type="connected_component_lane_extractor_node" /> 
+    <!-- Visualize and publish labeled output of classifier -->
+
+    <node pkg="lane_classifier" name="lane_labels_image_pub" type="lane_labels_image_node"/>
+    <node pkg="lane_classifier" name="lane_labels_image_pub_ex" type="lane_labels_image_node">
+        <remap from="lane_labels" to="lane_labels_ex"/>
+        <remap from="image_driveable" to="image_driveable_ex"/>
+    </node>
+
+    <node pkg="image_view" name="frontCam_view" type="image_view">
+        <remap from="image" to="/PTZ/image_raw" />
+    </node>
+
+    <node pkg="image_view" name="frontCam_proj_view" type="image_view">
+        <remap from="image" to="/PTZ/image_projected" />
+    </node>
+
+    <node pkg="image_view" name="lane_trainer_view" type="image_view">
+        <remap from="image" to="/image_trainer" />
+    </node>
+
+    <node pkg="image_view" name="component_view" type="image_view">
+        <remap from="image" to="/component" />
+    </node>
+    <node pkg="image_view" name="lane_driveable_view" type="image_view">
+        <remap from="image" to="/image_driveable" />
+    </node>
+    <node pkg="image_view" name="lane_driveable_ex_view" type="image_view">
+        <remap from="image" to="/image_driveable_ex" />
+    </node>
+</launch>
+

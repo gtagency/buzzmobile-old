@@ -1,16 +1,16 @@
 <package>
-  <description brief="projection">
+  <description brief="frame_cap">
 
-     projection
+     frame_cap
 
   </description>
   <author>Jesse Rosalia</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/projection</url>
+  <url>http://ros.org/wiki/frame_cap</url>
   <depend package="roscpp"/>
-  <depend package="opencv2"/>
   <depend package="image_lib"/>
+  <depend package="sensor_msgs"/>
 
 </package>
 

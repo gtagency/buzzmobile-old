@@ -11,18 +11,17 @@
 #include <math.h>
 
 using namespace core_msgs;
-//using namespace corobot_srvs;
-/*
-ros::ServiceClient moveArm_client;
-ros::ServiceClient moveWrist_client; 
-ros::ServiceClient moveGripper_client; 
-ros::ServiceClient resetArm_client; 
-*/
-//ros::Publisher driveControl_pub,steerControl_pub; //takepic_pub,pan_tilt_control;
-//
+
+#define reverse_button buttons[11]
+#define brake_button buttons[14]
+#define horn_button buttons[15]
+
 ros::Publisher motion_pub;
 ros::Publisher horn_pub;
-int maxFwdSpeed = 2.5; //m/s
+//NOTE: this is also published by the autonomous brake...this is ok.
+ros::Publisher brake_pub;
+
+int maxFwdSpeed = 1; //m/s
 int pubFreq     = 10; //hz
 
 bool obstacleFlag = false;
@@ -30,7 +29,8 @@ bool obstacleFlag = false;
 float lastSpeed = 0;
 float lastAngle = 0;
 
-bool manualToggle = false;
+bool manualToggle = true; //start up with manual toggle = true
+bool brakePushed  = false;
 //int pan_value,tilt_value;
 //double orx;
 //double ory,orz;
@@ -41,13 +41,14 @@ bool manualToggle = false;
 	speed_value = msg->velocity;
 }
 */
+void handleBrake(const sensor_msgs::Joy::ConstPtr& joy);
 void handleDrive(const sensor_msgs::Joy::ConstPtr& joy);
-void handleManualToggle(const sensor_msgs::Joy::ConstPtr& joy);
 void handleTurn(const sensor_msgs::Joy::ConstPtr& joy);
 void handleHorn(const sensor_msgs::Joy::ConstPtr& joy);
 
 void honkHorn(); 
 void sendMotionCommand();
+void sendBrakeCommand();
 
 void keepAliveCallback(const ros::TimerEvent&) {
   // To keep alive, just resend the motion command
@@ -56,13 +57,13 @@ void keepAliveCallback(const ros::TimerEvent&) {
 
 void joyCallback(const sensor_msgs::Joy::ConstPtr& joy) {
 
+	handleBrake(joy);
 	handleHorn(joy);
 	
 //	if (obstacleFlag) {
 //		return;
 //	}
     
-	handleManualToggle(joy);
   handleDrive(joy);
   handleTurn(joy);
 }
@@ -74,6 +75,12 @@ void sendMotionCommand() {
   motion_pub.publish(msg);
 }
 
+void sendBrakeCommand() {
+  std_msgs::Bool msg;
+  msg.data = manualToggle;
+  brake_pub.publish(msg);
+}
+
 void handleDrive(const sensor_msgs::Joy::ConstPtr& joy) {
   //********************************************
   //Motor control
@@ -82,7 +89,7 @@ void handleDrive(const sensor_msgs::Joy::ConstPtr& joy) {
   //if the stop button isnt held, we want to go
   //otherwise, just keep sending the stop command
   float correction = -1.0; //required because the range of a button axis is 0 to -1.0 (all pushed in)
-  speed = correction * (joy->buttons[11] ? -1 : 1) * maxFwdSpeed * joy->axes[13];
+  speed = correction * (joy->reverse_button ? -1 : 1) * maxFwdSpeed * joy->axes[13];
 	ROS_INFO("Speed: %f", speed);
   if (lastSpeed != speed) {
     lastSpeed = speed;
@@ -90,8 +97,23 @@ void handleDrive(const sensor_msgs::Joy::ConstPtr& joy) {
   }
 }
 
-void handleManualToggle(const sensor_msgs::Joy::ConstPtr& joy) {
-    //NO OP for now
+void handleBrake(const sensor_msgs::Joy::ConstPtr& joy) {
+  bool pub = false;
+  if (joy->brake_button) {
+    // When we first press the button, toggle the flag and publish
+    if (!brakePushed) {
+      brakePushed = true;
+      manualToggle = true;
+      sendBrakeCommand();
+    }
+  } else {
+    // When we first release the button, toggle the flag and publish
+    if (brakePushed) {
+      brakePushed = false;
+      manualToggle = false;
+      sendBrakeCommand();
+    }
+  }
 }
 
 void handleTurn(const sensor_msgs::Joy::ConstPtr& joy) {
@@ -110,7 +132,7 @@ void handleTurn(const sensor_msgs::Joy::ConstPtr& joy) {
 }
 
 void handleHorn(const sensor_msgs::Joy::ConstPtr& joy) {
-    if (joy->buttons[14]) {
+    if (joy->horn_button) {
         honkHorn();
     }	
 }
@@ -138,7 +160,11 @@ int main(int argc, char** argv) {
  
   motion_pub = n.advertise<core_msgs::MotionCommand>("motion_command", 100);
   horn_pub   = n.advertise<sound_play::SoundRequest>("robotsound", 100);
+  brake_pub  = n.advertise<std_msgs::Bool>("brake", 100, true);
 
+
+  // Initialize the latched topic
+  sendBrakeCommand(); 
   ros::Subscriber sub = n.subscribe<sensor_msgs::Joy>("joy", 1000, joyCallback);
   ros::Subscriber sub2 = n.subscribe<std_msgs::Bool>("obstacle_flag", 1000, obstacleCallback);
   ros::Rate r(pubFreq);

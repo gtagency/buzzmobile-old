@@ -8,6 +8,11 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/driver_bicycle</url>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="planner_astar_bicycle"/>
+  <depend package="core_msgs"/>
 
 </package>
 

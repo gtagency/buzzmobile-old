@@ -1,16 +1,16 @@
 <package>
-  <description brief="image_flip">
+  <description brief="duo3d_mini_lx_cam">
 
-     image_flip
+     duo3d_mini_lx_cam
 
   </description>
   <author>Jesse Rosalia</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/image_flip</url>
+  <url>http://ros.org/wiki/duo3d_mini_lx_cam</url>
   <depend package="roscpp"/>
-  <depend package="image_lib"/>
   <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
 
 </package>
 

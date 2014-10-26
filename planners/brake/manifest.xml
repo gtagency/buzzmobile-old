@@ -1,0 +1,19 @@
+<package>
+  <description brief="brake">
+
+      Soft brake, designed to inhibit driving due to obstacles (without tripping any hard switches or stops).
+
+  </description>
+  <author>Jesse Rosalia</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/brake</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="core_msgs"/>
+  <depend package="bicycle_model"/>
+
+</package>
+
+

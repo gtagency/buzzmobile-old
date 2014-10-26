@@ -1,6 +1,6 @@
 import math
 
-class DifferentialDriver:
+class BicycleDriver:
     def __init__(self, sideWheelSeparation, targetV, toleranceDist, toleranceTheta):
         self.wheelSeparation = sideWheelSeparation
         self.targetV = targetV
@@ -57,7 +57,7 @@ class DifferentialDriver:
 
         v = self.targetV
         gamma = math.atan(dtheta * self.wheelSeparation / v)
-        
+
         return (v, gamma)
 
     """ Converts an (x, y, theta) pose from the world coordinate frame to the

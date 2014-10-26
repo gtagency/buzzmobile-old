@@ -1,40 +1,16 @@
 #include <opencv2/opencv.hpp>
 #include <ros/ros.h>
 #include <sensor_msgs/image_encodings.h>
-#include <cv_bridge/cv_bridge.h>
 #include "sensor_msgs/Image.h"
 #include "lane_trainer/LaneInstanceArray.h"
 #include "lane_trainer/LaneInstance.h"
 #include <memory>
+#include "image_lib/image_lib.h"
+
+using namespace image_lib;
 
 ros::Publisher pub;
 ros::Publisher img_pub;
-
-namespace enc = sensor_msgs::image_encodings;
-
-const std::string& getRosType(int cvType) {
-  switch(cvType) {
-    case CV_8UC3: return enc::BGR8;
-    case CV_8UC1: return enc::MONO8;
-    default:
-      std::stringstream s;
-      s << cvType;
-      throw std::runtime_error("Unrecognized Opencv type [" + s.str() + "]");
-  }
-}
-void imageMsgToCvCopy(const sensor_msgs::Image::ConstPtr& image, cv_bridge::CvImageConstPtr& cv_ptr) {
-  try {
-    if (enc::isColor(image->encoding))
-      cv_ptr = cv_bridge::toCvShare(image, enc::BGR8);
-    else
-      cv_ptr = cv_bridge::toCvShare(image, enc::MONO8);
-//    cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
-  }
-  catch (cv_bridge::Exception& e) {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
-  }
-}
 
 struct Vec3bCompare {
 public:
@@ -65,7 +41,7 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
   cv::Mat projectedImage, sobelImg, threshImg;
 
   cv_bridge::CvImageConstPtr cv_ptr;
-  imageMsgToCvCopy(image, cv_ptr); 
+  imageMsgToCvShare(image, cv_ptr); 
   projectedImage = cv_ptr->image;
 
   const int SLICE_Y = 1*(projectedImage.rows/6);
@@ -82,7 +58,8 @@ void generateTrainingSet(const sensor_msgs::Image::ConstPtr& image) {
   cv::Mat HSVSlice;
   cv::cvtColor(slice, HSVSlice, CV_BGR2HSV);
 
-  cv::inRange(slice, GREEN_LOW, GREEN_HIGH, threshImg);
+  //cv::inRange(slice, GREEN_LOW, GREEN_HIGH, threshImg);
+  cv::inRange(slice, YELLOW_LOW, YELLOW_HIGH, threshImg);
   //cv::inRange(slice, cv::Scalar(45, 255, 0), cv::Scalar(60, 135, 255), threshImg);
 
   slice.convertTo(slice, CV_16S);
