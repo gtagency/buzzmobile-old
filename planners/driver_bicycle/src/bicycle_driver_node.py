@@ -9,7 +9,7 @@ from core_msgs.msg import MotionCommand
 
 class BicycleDriveNode:
     def __init__(sideWheelSeparation, targetV, toleranceDist, toleranceTheta):
-        self.driver = BicycleDriver(sideWheelSeparation, targetV,
+        self.driver = bicycle_driver.BicycleDriver(sideWheelSeparation, targetV,
                                     toleranceDist, toleranceTheta)
         self.traj_pub = rospy.Publisher("motion_command", MotionCommand)
         rospy.Subscriber("car_position", Pose2D, self.updatePosition)

@@ -1,33 +1,30 @@
-import Queue
+import heapq
 import math
 
 def planPath(img, carWidthPixel, pixelStep):
-    pq = Queue.PriorityQueue()
     # x, y, theta
     start = (len(img[0]) / 2, len(img), 0)
     # priority, cost, state
-    pq.put((heuristic(start), 0, start))
+    pq = [(heuristic(img, start), 0, start, None)]
 
     parents = {start: None}
     best = (start, stateScore(img, start))
     visited = set([])
 
     while pq:
-        priority, cost, state = pq.get()
+        priority, cost, state, parent = heapq.heappop(pq)
         if state not in visited:
             visited.add(state)
+            parents[state] = parent
 
             if isGoalState(img, state):
                 return reconstructPath(parents, state)
-
             score = stateScore(img, state)
             if score > best[1]:
                 best = (state, score)
-
-            for successor in successors(img, state, carWidth, pixelStep):
+            for successor in successors(img, state, carWidthPixel, pixelStep):
                 newCost = cost + 1
-                pq.put((heuristic(img, state) + newCost, newCost, state))
-
+                heapq.heappush(pq, (heuristic(img, state) + newCost, newCost, successor, state))
     return reconstructPath(parents, best[0])
 
 
@@ -60,16 +57,16 @@ def successors(img, state, carWidth, pixelStep):
     for successorDelta in successorDeltas:
         dx, dy, dtheta = successorDelta
         t = state[2]
-        newX = math.cos(t) * dx - math.sin(t) * dy + state[0]
-        newY = math.sin(t) * dx + math.cos(t) * dy + state[1]
+        newX = math.cos(t) * dx + math.sin(t) * dy + state[0]
+        newY = math.sin(t) * dx - math.cos(t) * dy + state[1]
         newTheta = (t + dtheta) % (2 * math.pi)
-        if newX < len(img[0]) and newX > 0 and newY < len(img)
+        if newX < len(img[0]) and newX > 0 and newY < len(img) \
                 and newY > 0 and checkSurroundings(img, (newX, newY), carWidth):
             successors.append((newX, newY, newTheta))
     return successors
 
 def checkSurroundings(img, pos, carWidth):
-    if not img[y][x] == 1:
+    if not img[int(pos[1])][int(pos[0])] == 1:
         return False
     r = carWidth/2
     t = 0
