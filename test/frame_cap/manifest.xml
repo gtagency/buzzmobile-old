@@ -1,0 +1,17 @@
+<package>
+  <description brief="frame_cap">
+
+     frame_cap
+
+  </description>
+  <author>Jesse Rosalia</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/frame_cap</url>
+  <depend package="roscpp"/>
+  <depend package="cv_bridge"/>
+  <depend package="sensor_msgs"/>
+
+</package>
+
+
