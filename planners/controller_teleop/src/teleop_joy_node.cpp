@@ -23,6 +23,7 @@ ros::ServiceClient resetArm_client;
 ros::Publisher motion_pub;
 ros::Publisher horn_pub;
 int maxFwdSpeed = 2.5; //m/s
+int pubFreq     = 10; //hz
 
 bool obstacleFlag = false;
 
@@ -46,6 +47,13 @@ void handleTurn(const sensor_msgs::Joy::ConstPtr& joy);
 void handleHorn(const sensor_msgs::Joy::ConstPtr& joy);
 
 void honkHorn(); 
+void sendMotionCommand();
+
+void keepAliveCallback(const ros::TimerEvent&) {
+  // To keep alive, just resend the motion command
+  sendMotionCommand();
+}
+
 void joyCallback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 	handleHorn(joy);
@@ -69,14 +77,13 @@ void sendMotionCommand() {
 void handleDrive(const sensor_msgs::Joy::ConstPtr& joy) {
   //********************************************
   //Motor control
-  printf("WOAH\n"); 
   float speed = 0.0;
   int secondsDuration = 0;
   //if the stop button isnt held, we want to go
   //otherwise, just keep sending the stop command
   float correction = -1.0; //required because the range of a button axis is 0 to -1.0 (all pushed in)
   speed = correction * (joy->buttons[11] ? -1 : 1) * maxFwdSpeed * joy->axes[13];
-	printf("Speed: %f\n", speed);
+	ROS_INFO("Speed: %f", speed);
   if (lastSpeed != speed) {
     lastSpeed = speed;
     sendMotionCommand();
@@ -93,7 +100,7 @@ void handleTurn(const sensor_msgs::Joy::ConstPtr& joy) {
   float mag = sqrt(joy->axes[0] * joy->axes[0] + joy->axes[1] * joy->axes[1]);
   //joystick is around the center...send 0 speed
   if (mag > 1e-6) {
-    angle = atan2(fabs(joy->axes[1]), -joy->axes[0]);
+    angle = atan2(fabs(joy->axes[1]), -joy->axes[0]) - M_PI_2;
     ROS_INFO("angle: [%f]", angle);
   }
   if (lastAngle != angle) {
@@ -134,6 +141,9 @@ int main(int argc, char** argv) {
 
   ros::Subscriber sub = n.subscribe<sensor_msgs::Joy>("joy", 1000, joyCallback);
   ros::Subscriber sub2 = n.subscribe<std_msgs::Bool>("obstacle_flag", 1000, obstacleCallback);
+  ros::Rate r(pubFreq);
 
+  ros::Timer keepAliveTimer = n.createTimer(ros::Duration(1.0/pubFreq), keepAliveCallback);
   ros::spin();
+
 }

@@ -103,9 +103,25 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
   for(int row = 0; row < cvt.rows; ++row) {
     //cout << "Row: " << row << endl;
     Point3_<uchar> *p = cvt.ptr<Point3_<uchar> > (row);
-    Point3_<uchar> *sp = marked.ptr<Point3_<uchar> >(row);
-    //assumes CV_8UC3 LAB color image, with 3 values per pixel
-    for(int col = 0; col < cvt.cols; ++col, ++p, ++sp) {
+    int end = cvt.cols - 1;
+    //scan for the end, which is the first color pixel from the right
+    
+    for(; end >= 0; --end) {
+      if (p[end].x != 0 || p[end].y != 0 || p[end].z != 0) {
+        break;
+      }
+    }
+
+
+    //scan for the start, which is the first color pixel from the left
+    int col = 0;
+    for(; col <= end; ++p, ++col) {
+      if (p[col].x != 0 || p[col].y != 0 || p[col].z != 0) {
+        break;
+      }
+    }
+    //build instances for all pixels in the middle
+    for(; col <= end; ++p, ++col) {
       getFeatures(p, features);
       Instance inst = makeInstance(features, -1);
       inst.row = row;
@@ -120,13 +136,13 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
   lane_classifier::LaneLabels labelsMsg;
   labelsMsg.width = marked.size().width;
   labelsMsg.height= marked.size().height;
-
+  labelsMsg.labels.resize(labelsMsg.width * labelsMsg.height, 0);
   //row-order labels, which is what we're putting out already
 //  std::swap(labelsMsg.labels, labels);
-  for (std::vector<int>::iterator it = labels.begin();
-       it != labels.end();
+  for (std::vector<Instance>::iterator it = toClassify.begin();
+       it != toClassify.end();
        it++) {
-    labelsMsg.labels.push_back(*it);
+    labelsMsg.labels.at(it->row * labelsMsg.width + it->col) = it->label;
   }
   labels_pub.publish(labelsMsg);
   //markedImage.toImageMsg());
