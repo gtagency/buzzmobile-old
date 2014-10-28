@@ -4,6 +4,6 @@
 #
 #
 
-# A set of polygons to describe the obstacle.  It is assumed that
-# the walls and interior of all of the polygons are non-drivable.
-geometry_msgs/Polygon[] polygons
+
+geometry_msgs/Point32 center
+float32 radius
