@@ -90,7 +90,7 @@ void Arduino::setSpeed(double val) {
   speed = val;
 }
 
-void Arduino::setOdometryCallback(void (*callback)(int)) {
+void Arduino::setOdometryCallback(void (*callback)(int, float)) {
   odometry_callback = callback;
 }
 
