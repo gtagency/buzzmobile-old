@@ -1,0 +1,34 @@
+<launch>
+    <arg name="ns" default=""/>
+  <node pkg="image_view" type="image_view" name="frontCam_view">
+    <remap from="image" to="/$(arg ns)/image_raw"/>
+  </node>
+
+    <!-- Visualize and publish labeled output of classifier -->
+    <node pkg="lane_classifier" name="lane_labels_image_pub" type="lane_labels_image_node">
+        <remap from="lane_labels" to="/$(arg ns)/lane_labels"/>
+    </node>
+    <node pkg="lane_classifier" name="lane_labels_image_pub_ex" type="lane_labels_image_node">
+        <remap from="lane_labels" to="/$(arg ns)/lane_labels_ex"/>
+        <remap from="image_driveable" to="image_driveable_ex"/>
+    </node>
+
+    <node pkg="image_view" name="frontCam_proj_view" type="image_view" >
+        <remap from="image" to="/$(arg ns)/image_projected" />
+    </node>
+
+    <node pkg="image_view" name="lane_trainer_view" type="image_view" >
+        <remap from="image" to="/$(arg ns)/image_trainer" />
+    </node>
+
+    <node pkg="image_view" name="component_view" type="image_view" >
+        <remap from="image" to="/$(arg ns)/component" />
+    </node>
+    <node pkg="image_view" name="lane_driveable_view" type="image_view" >
+        <remap from="image" to="image_driveable" />
+    </node>
+    <node pkg="image_view" name="lane_driveable_ex_view" type="image_view" >
+        <remap from="image" to="image_driveable_ex" />
+    </node>
+</launch>
+

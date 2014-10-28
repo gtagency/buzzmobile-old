@@ -1,0 +1,11 @@
+<launch>
+    <node pkg="lane_trainer" name="lane_trainer" type="lane_trainer_node">
+    </node>
+
+    <node pkg="lane_classifier" name="lane_classifier" type="lane_classifier_node">
+    </node>
+
+    <node pkg="lane_extractor" name="lane_extractor" type="connected_component_lane_extractor_node" /> 
+
+</launch>
+
