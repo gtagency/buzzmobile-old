@@ -1,0 +1,62 @@
+<launch>
+
+    <arg name="record_cameras" default="true" />
+
+    <!-- 1 if you want to invert the motors, 0 if not. This is used only in the case where the robot can turn properly but the forward and backward movement are inverted (by testing in the corobot_teleop package for example). It also invert the encoders at the same time-->
+    <arg name="motors_inverted" value="0"/>
+
+    <!-- 1 if you want to invert the encoders, 0 if not. This is used when the odometry give a negative x position when the robot moves forward-->
+    <arg name="encoders_inverted" value="0"/>
+
+    <!-- 1 if you have one front camera, 0 if you don't -->
+    <arg name="FrontCamera" value="1"/>
+    <!-- 1 if you want to enable the mjpeg_stream, 0 to unable it. If enable, the camera will send mjpeg stream to the usb instead of raw rgb images. This saves usb bandwidth, but add some computational need-->
+    <arg name="cameraFront_mjpeg_stream" value="1"/>
+    <!-- 1 if you want to enable to jpeg compression for the image visualizer in the corobot_teleop GUI, 0 to unable it -->
+    <arg name="cameraFront_jpeg_compression" value="1"/>
+    <!-- port of the camera -->
+    <arg name="cameraFront_port" value="/dev/video0"/>
+    <!-- parameter file of the camera -->   
+    <arg name="cameraFront_parameter_file" value="$(find corobot_camera)/camera_parameters/quickcam_pro_9000.txt"/>
+    <!-- Topic where the images will be send on -->
+    <arg name="cameraFront_topic" value="/PTZ/image_raw"/>
+    <!-- Width of the images -->
+    <arg name="cameraFront_width" value="640"/>
+    <!-- Height of the images -->
+    <arg name="cameraFront_height" value="480"/>
+    <!-- if true starts the camera immediately, if false requires a manual start-->
+    <arg name="cameraFront_immediately" value="true"/>
+    <!-- Number of images per second received from the camera-->
+    <arg name="cameraFront_fps" value="10"/>
+    <!-- JPEG quality, if 100 high quality, if 0 very bad quality -->
+    <arg name="cameraFront_JpegQuality" value="50"/>
+
+    <param name="PTZ/image_raw/compressed/jpeg_quality" type="int" value="$(arg cameraFront_JpegQuality)"/>
+
+	<node pkg="usb_cam" name="PTZ" type="usb_cam_node">
+		<param name="video_device" value="$(arg cameraFront_port)"/>
+       <!-- <param name="image_width" value="$(arg cameraFront_width)" /> -->
+<!--        <param name="image_height" value="$(arg cameraFront_height)" /> -->
+        <param name="framerate" value="$(arg cameraFront_fps)" />
+        <param name="pixel_format" value="yuyv" />
+	</node>
+    <node pkg="projection" name="frontCam_proj" type="projection_node" ns="PTZ">
+<!--        <remap from="image_raw" to="image_color"/> -->
+        <param name="ground_z_dim" value="3.5365"/>
+    </node>
+    <node pkg="image_view" name="frontCam_view" type="image_view">
+        <remap from="image" to="/PTZ/image_raw" />
+    </node>
+    <node pkg="image_view" name="frontCam_proj_view" type="image_view">
+        <remap from="image" to="/PTZ/image_projected" />
+    </node>
+
+	<node pkg="hokuyo_node" name="hokuyo_node" type="hokuyo_node">
+        <param name="port" value="/dev/sensors/hokuyo_H1008911" />
+    </node>
+    <node pkg="rosbag" type="record" name="rosbag_record_cam"
+       args="/PTZ/image_raw /PTZ/camera_info /BACK/image_raw /BACK/camera_info /scan"
+       if="$(arg record_cameras)" />
+
+</launch>
+

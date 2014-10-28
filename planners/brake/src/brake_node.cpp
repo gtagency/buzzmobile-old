@@ -15,7 +15,7 @@ ros::Publisher brake_pub;
 core_msgs::Pose2DAndVelStamped currentPoseAndVel;
 
 geometry_msgs::Point32 computeCurrentCarPoint() {
-  //TODO:
+  //TODO: use biccle model to extrapolate current pose out.  assume some tunable number of seconds to stop
   geometry_msgs::Point32 pt;
   pt.x = 0;
   pt.y = 0;
@@ -28,6 +28,7 @@ bool hitTest(const geometry_msgs::Polygon& poly, const geometry_msgs::Point32& p
 }
 void obstacleCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& msg) {
   geometry_msgs::Point32 testPt = computeCurrentCarPoint();  
+  /*
   for (std::vector<core_msgs::Obstacle>::const_iterator it = msg->obstacles.begin();
        it != msg->obstacles.end();
        it++) {
@@ -42,7 +43,7 @@ void obstacleCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& msg) {
         break;
       }
     }
-  }
+  }*/
 }
 
 void carPosAndVelCallback(const core_msgs::Pose2DAndVelStamped::ConstPtr& msg) {
