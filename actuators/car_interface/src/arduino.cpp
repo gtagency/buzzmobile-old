@@ -65,11 +65,11 @@ void Arduino::write_run() {
 }
 
 void Arduino::read_run() {
+  char buffer[5];
   while(threads_running) {
     char in = 0;
     boost::asio::read(port, boost::asio::buffer(&in, 1));
     if(in == STX) {
-      char * buffer = new char[5];
       boost::asio::read(port, boost::asio::buffer(buffer, 5));
       int tickCount = atoi(buffer);
       boost::asio::read(port, boost::asio::buffer(buffer, 5));
