@@ -29,8 +29,7 @@ int main(int argc, char **argv) {
 
   ros::init(argc, argv, "car_interface");
 
-  //arduino.open("/dev/arduino_motor_controller", 9600);
-  arduino.open("/dev/ttyACM0", 9600);
+  arduino.open("/dev/arduino_motor_controller", 9600);
   arduino.setEncoderCallback(encoder_callback);
 
   ros::NodeHandle node_handle;
