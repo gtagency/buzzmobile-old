@@ -19,7 +19,7 @@ public:
 
   void setSpeed(double speed);
 
-  void setEncoderCallback(void (*callback)(int));
+  void setOdometryCallback(void (*callback)(int, float));
 
 private:
   boost::asio::io_service ioservice;
@@ -35,7 +35,7 @@ private:
   void write_run();
   void read_run();
 
-  void (*encoder_callback)(int);
+  void (*odometry_callback)(int);
 
   std::string padded_itoa(int i, int width);
 

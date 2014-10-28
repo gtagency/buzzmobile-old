@@ -94,7 +94,7 @@ void loop() {
       steerController.setDesiredValue(Serial.parseFloat());
       lastCmdTime = millis();
       retMsg[0] = STX;
-      sprintf(retMsg+1, "%05i", count);
+      sprintf(retMsg+1, "%05i%05.4f", count, getSteeringAngle());
       Serial.println(retMsg);
       count = 0;
     }
