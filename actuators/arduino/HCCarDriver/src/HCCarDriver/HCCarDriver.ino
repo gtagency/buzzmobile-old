@@ -3,7 +3,7 @@
 #include "pid.h"
 #include <stdio.h>
 
-#define STX ((char)'$')
+#define STX ((char)2)
 
 const int motor_pin = 3;
 const int steer_pin = 5;
@@ -32,7 +32,7 @@ float desiredAngle = 0; // rad
 long lastTime;
 
 PDController speedController(2, -0.1);
-PDController steerController(-0.5, 0.5);
+PDController steerController(15, -7.5);
 
 long lastCmdTime;
 
@@ -48,7 +48,7 @@ float getSpeed() {
 }
 
 float getSteeringAngle() {
-  return anglePerPotTick * (analogRead(pot_pin) - midPotVal);
+  return -1 * anglePerPotTick * (analogRead(pot_pin) - midPotVal);
 }
 
 void stopAll() {
@@ -79,7 +79,7 @@ void setup() {
   speedController.setOutput(90);
   steerController.setOutput(90);
   speedController.setRange(0, 180);
-  steerController.setRange(82, 97);
+  steerController.setRange(30, 150);
   speedController.setDesiredValue(0);
   steerController.setDesiredValue(0);
   
@@ -116,7 +116,7 @@ void loop() {
   
   if(millis() - lastCmdTime > 500) {
     digitalWrite(led_pin, HIGH);
-    //stopAll();
+    stopAll();
   } else {
     digitalWrite(led_pin, LOW);
   }
