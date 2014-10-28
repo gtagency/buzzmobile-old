@@ -35,7 +35,7 @@ private:
   void write_run();
   void read_run();
 
-  void (*odometry_callback)(int);
+  void (*odometry_callback)(int, float);
 
   std::string padded_itoa(int i, int width);
 
