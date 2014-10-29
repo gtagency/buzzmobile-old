@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/gate_detector</url>
   <depend package="roscpp"/>
   <depend package="core_msgs"/>
+  <depend package="image_lib"/>
 
 </package>
 
