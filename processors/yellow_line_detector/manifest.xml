@@ -1,0 +1,18 @@
+<package>
+  <description brief="yellow_line_detector">
+
+     yellow_line_detector
+
+  </description>
+  <author>Jesse Rosalia</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/yellow_line_detector</url>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="core_msgs"/>
+  <depend package="image_lib"/>
+
+</package>
+
+
