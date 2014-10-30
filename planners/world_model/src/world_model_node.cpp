@@ -8,16 +8,6 @@ ros::Publisher worldModel_pub;
 
 void updateWorldModel();
 
-struct RegionCallback {
-
-  core_msgs::WorldRegion region;
-  void operator()(const core_msgs::WorldRegion::ConstPtr& region) {
-    this->region = *region;
-    std::cout << "Receivin: " << this->region.width << std::endl;
-    updateWorldModel();
-  }
-};
-
 core_msgs::WorldRegion gateRegion;
 
 void gateRegionCallback(const core_msgs::WorldRegion::ConstPtr& region) {
@@ -96,10 +86,16 @@ void updateWorldModel() {
   }
 
   // Next: merge all 3 regions together
-  core_msgs::WorldRegion merged = gateRegion;
+  core_msgs::WorldRegion merged;
+  merged.width = gateRegion.width;
+  merged.height = gateRegion.height;
+  merged.resolution = gateRegion.resolution;
+  merged.labels.assign(merged.height * merged.width, 0);
   for (unsigned int inx = 0; inx < merged.width * merged.height; inx++) {
-    if (merged.labels[inx] != laneRegion.labels[inx]
-        || merged.labels[inx] != obsregion.labels[inx]) {
+    if (gateRegion.labels[inx] == laneRegion.labels[inx]
+        && gateRegion.labels[inx] == obsregion.labels[inx]) {
+      merged.labels[inx] = 1;
+    } else {
       merged.labels[inx] = 0;
     }
   }
