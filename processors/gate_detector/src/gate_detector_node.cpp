@@ -54,8 +54,8 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
   msg.resolution = params.pixels_per_meter;
   msg.labels.assign(msg.width * msg.height, 0);
   geometry_msgs::Point32 bottomLeft, bottomRight;
-  bottomRight.y = -(params.car_width_meters / 2) * msg.resolution;
-  bottomLeft.y = (params.car_width_meters / 2) * msg.resolution;
+  bottomRight.y = (params.car_width_meters / 2) * msg.resolution;
+  bottomLeft.y = -(params.car_width_meters / 2) * msg.resolution;
   bottomLeft.x = bottomRight.x = 0;
 
   post1.center.x *= msg.resolution;
@@ -70,8 +70,8 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
       int x = msg.height - row;
       // This assumes that y is positive to the right. Might want to fix in obstacle detector
       int y = col - (msg.width / 2);
-      if (x > MINIMUM_DISTANCE_METERS / msg.resolution) {
-	if (x > line(bottomLeft, post2.center, y) && x > line(bottomRight, post1.center, y)) {
+      if (x > MINIMUM_DISTANCE_METERS * msg.resolution) {
+	if (x > line(bottomRight, post2.center, y) && x > line(bottomLeft, post1.center, y)) {
 	  msg.labels[position] = 1;
 	} else {
 	  msg.labels[position] = 0;
