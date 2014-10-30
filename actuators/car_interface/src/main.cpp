@@ -19,7 +19,7 @@ ros::Time last_command_time;
 
 ros::Duration keep_alive_frequency(1.0);
 
-void encoder_callback(int);
+void odometry_callback(int, float);
 
 void command_callback(core_msgs::MotionCommand::ConstPtr);
 
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "car_interface");
 
   arduino.open("/dev/arduino_motor_controller", 9600);
-  arduino.setEncoderCallback(encoder_callback);
+  arduino.setOdometryCallback(odometry_callback);
 
   ros::NodeHandle node_handle;
 
@@ -53,9 +53,10 @@ void keep_alive_callback(const ros::TimerEvent&) {
     arduino.setSpeed(0);
   }
 }
-void encoder_callback(int tickCount) {
+void odometry_callback(int tickCount, float steeringAngle) {
   core_msgs::Odom msg;
   msg.distance_travelled = (tickCount * wheelCirc) / ticksPerRev;
+  msg.steering_angle = steeringAngle;
   msg.header.seq = odom_sequence++;
   msg.header.stamp = ros::Time::now();
   encoder_pub.publish(msg);
