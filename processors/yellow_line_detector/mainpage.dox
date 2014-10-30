@@ -2,7 +2,7 @@
 \mainpage
 \htmlinclude manifest.html
 
-\b driver_differential
+\b yellow_line_detector 
 
 <!-- 
 Provide an overview of your package.

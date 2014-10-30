@@ -1,0 +1,17 @@
+<package>
+  <description brief="world_model">
+
+     world_model
+
+  </description>
+  <author>Jesse Rosalia</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/world_model</url>
+  <depend package="roscpp"/>
+  <depend package="core_msgs"/>
+  <depend package="sensor_msgs"/>
+
+</package>
+
+

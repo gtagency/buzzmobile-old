@@ -1,0 +1,17 @@
+<package>
+  <description brief="gate_detector">
+
+     gate_detector
+
+  </description>
+  <author>Jesse Rosalia</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/gate_detector</url>
+  <depend package="roscpp"/>
+  <depend package="core_msgs"/>
+  <depend package="image_lib"/>
+
+</package>
+
+
