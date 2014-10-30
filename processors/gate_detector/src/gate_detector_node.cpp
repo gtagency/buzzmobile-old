@@ -45,6 +45,9 @@ bool obsDistanceCompare(const core_msgs::Obstacle& ob1, const core_msgs::Obstacl
 
 void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
   std::vector<core_msgs::Obstacle> obstacles(inmsg->obstacles);
+  if(obstacles.size() == 0) {
+    return;
+  }
   std::vector<core_msgs::Obstacle>::iterator bound = std::partition(obstacles.begin(), obstacles.end(), isYPositive);
   core_msgs::Obstacle post1 = *std::max_element(obstacles.begin(), bound, obsDistanceCompare);
   core_msgs::Obstacle post2 = *std::max_element(bound, obstacles.end(), obsDistanceCompare);
@@ -98,8 +101,7 @@ int main(int argv, char **argc) {
   DECLARE_PARAM(car_width, double, 5);
   DECLARE_PARAM(output_x_res, double, 800);
   DECLARE_PARAM(output_y_res, double, 800);
-  //Was 40 pixels/meter
-  DECLARE_PARAM(pixels_per_meter, double, 10);
+  DECLARE_PARAM(pixels_per_meter, double, 23);
 
   params.car_width_meters = car_width;
   params.output_x_res = output_x_res;
