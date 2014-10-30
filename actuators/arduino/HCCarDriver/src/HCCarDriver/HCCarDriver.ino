@@ -21,8 +21,8 @@ volatile int count = 0;
 const double ticksPerRev = 3600;
 const double wheelCirc = 2.198;
 
-const int minPotVal = 540;
-const int maxPotVal = 775;
+const int minPotVal = 552;
+const int maxPotVal = 729;
 const int midPotVal = 660;
 const float anglePerPotTick = 0.003697731; // rad
 
