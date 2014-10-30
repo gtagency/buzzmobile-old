@@ -64,8 +64,8 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
   post2.center.x *= msg.resolution;
   post2.center.y *= msg.resolution;
 
-  for (int row = 0; row < params.output_y_res; row++) {
-    for (int col = 0; col < params.output_x_res; col++) {
+  for (int row = 0; row < msg.height; row++) {
+    for (int col = 0; col < msg.width; col++) {
       int position = row * msg.width + col;
       int x = msg.height - row;
       // This assumes that y is positive to the right. Might want to fix in obstacle detector
