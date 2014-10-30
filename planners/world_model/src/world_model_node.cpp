@@ -38,6 +38,10 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& obsArray
   updateWorldModel();
 }
 
+double euclideanDistance(int centerX, int centerY, int ptX, int ptY) {
+  return sqrt(pow(centerX - ptX, 2) + pow(centerY - ptY, 2));
+}
+
 void updateWorldModel() {
   //TODO: current assumes all regions are the same size and resolution...this should be more flexible.
   //TODO: this also ignores timestamps, assuming that we're just going to get a lot of data...
@@ -53,13 +57,31 @@ void updateWorldModel() {
   obsregion.width = baseRegion.width;
   obsregion.height = baseRegion.height;
   obsregion.resolution = 100; // baseRegion.resolution;
-  int yres = 40;
+  int xres = 10;
+  int yres = 10;
   obsregion.labels.assign(obsregion.width * obsregion.height, 1); //assume everything is drivable
   for (std::vector<core_msgs::Obstacle>::iterator it = obstacles.begin();
        it != obstacles.end();
        it++) {
+
+    int centerX = obsregion.height - (it->center.x * xres);
+    int centerY = (it->center.y * yres) - (obsregion.width / 2);
+    int radius = it->radius * xres;
+
+    for (int row = 0; row < obsregion.height; ++row) {
+      for (int col = 0; col < obsregion.width; ++col) {
+	int position = row * obsregion.width + col;
+	int x = obsregion.height - row;
+	int y = col - (obsregion.width / 2);
+	if (euclideanDistance(centerX, centerY, x, y) < radius) {
+	  obsregion.labels[position] = 0;
+	} else {
+	  obsregion.labels[position] = 1;
+	}
+      }
+    }
     //FIXME: NOT SURE IF RIGHT THIS CODE IS TERRIBLE PLEASE DONT JUDGE ME
-    unsigned int centerRow = obsregion.height - (it->center.x * obsregion.resolution); 
+    /*unsigned int centerRow = obsregion.height - (it->center.x * obsregion.resolution); 
     unsigned int centerCol = obsregion.width / 2 + (it->center.y * yres);
     int radiusInPixels = (int)ceil(it->radius * obsregion.resolution);
     std::cout << it->center.x << "," << centerRow << "," << it->center.y << "," << centerCol << "," << radiusInPixels << std::endl;
@@ -70,11 +92,11 @@ void updateWorldModel() {
         std::cout << row << "," << col << std::endl;
         obsregion.labels[row * obsregion.width + col] = 0;
       }
-    }
+      }*/
   }
 
   // Next: merge all 3 regions together
-  core_msgs::WorldRegion merged = laneRegion; //gateRegionCallback.region;
+  core_msgs::WorldRegion merged = gateRegion;
   for (unsigned int inx = 0; inx < merged.width * merged.height; inx++) {
     if (merged.labels[inx] != laneRegion.labels[inx]
         || merged.labels[inx] != obsregion.labels[inx]) {
