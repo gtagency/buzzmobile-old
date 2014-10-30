@@ -1,6 +1,4 @@
-
 #include <ros/ros.h>
-
 #include <core_msgs/ObstacleArrayStamped.h>
 #include <core_msgs/WorldRegion.h>
 
@@ -39,7 +37,7 @@ void updateWorldModel() {
   // First: construct a region wherein everything is drivable except the obstacles
   std::cout << "Updating" << laneRegion.width << std::endl;
   core_msgs::WorldRegion obsregion;
-  core_msgs::WorldRegion& baseRegion = laneRegion;
+  core_msgs::WorldRegion& baseRegion = gateRegion; //laneRegion;
   if (baseRegion.width == 0) {
     return;
   }
@@ -47,42 +45,28 @@ void updateWorldModel() {
   obsregion.width = baseRegion.width;
   obsregion.height = baseRegion.height;
   obsregion.resolution = 100; // baseRegion.resolution;
-  int xres = 10;
-  int yres = 10;
+  int xres = 23;
+  int yres = 23;
   obsregion.labels.assign(obsregion.width * obsregion.height, 1); //assume everything is drivable
   for (std::vector<core_msgs::Obstacle>::iterator it = obstacles.begin();
        it != obstacles.end();
-       it++) {
-
-    int centerX = obsregion.height - (it->center.x * xres);
-    int centerY = (it->center.y * yres) - (obsregion.width / 2);
+      it++) {
+    int centerX = (it->center.x * xres);
+    int centerY = (it->center.y * yres);
     int radius = it->radius * xres;
 
-    for (int row = 0; row < obsregion.height; ++row) {
-      for (int col = 0; col < obsregion.width; ++col) {
+    //std::cout << centerX << ", " << centerY << ", " << radius << std::endl;
+
+    for (uint row = 0; row < obsregion.height; ++row) {
+      for (uint col = 0; col < obsregion.width; ++col) {
 	int position = row * obsregion.width + col;
 	int x = obsregion.height - row;
 	int y = col - (obsregion.width / 2);
 	if (euclideanDistance(centerX, centerY, x, y) < radius) {
 	  obsregion.labels[position] = 0;
-	} else {
-	  obsregion.labels[position] = 1;
 	}
       }
     }
-    //FIXME: NOT SURE IF RIGHT THIS CODE IS TERRIBLE PLEASE DONT JUDGE ME
-    /*unsigned int centerRow = obsregion.height - (it->center.x * obsregion.resolution); 
-    unsigned int centerCol = obsregion.width / 2 + (it->center.y * yres);
-    int radiusInPixels = (int)ceil(it->radius * obsregion.resolution);
-    std::cout << it->center.x << "," << centerRow << "," << it->center.y << "," << centerCol << "," << radiusInPixels << std::endl;
-    
-    for (unsigned int row = std::min(obsregion.height - 1, centerRow + radiusInPixels); row <= std::max(0, (int)(centerRow - radiusInPixels)); --row) {
-      int colDist = (int)ceil(sqrt(radiusInPixels * radiusInPixels - row * row));
-      for (unsigned int col = std::max((unsigned int)0, centerCol - colDist); col <= std::min(obsregion.width - 1, centerCol + colDist); col++) {
-        std::cout << row << "," << col << std::endl;
-        obsregion.labels[row * obsregion.width + col] = 0;
-      }
-      }*/
   }
 
   // Next: merge all 3 regions together
@@ -92,8 +76,9 @@ void updateWorldModel() {
   merged.resolution = gateRegion.resolution;
   merged.labels.assign(merged.height * merged.width, 0);
   for (unsigned int inx = 0; inx < merged.width * merged.height; inx++) {
-    if (gateRegion.labels[inx] == laneRegion.labels[inx]
-        && gateRegion.labels[inx] == obsregion.labels[inx]) {
+    if (gateRegion.labels[inx] == 1 
+	//&& laneRegion.labels[inx] == 1
+        && obsregion.labels[inx] == 1) {
       merged.labels[inx] = 1;
     } else {
       merged.labels[inx] = 0;
