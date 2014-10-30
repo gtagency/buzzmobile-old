@@ -108,7 +108,7 @@ int main(int argv, char **argc) {
 
   ros::Subscriber s = n.subscribe<core_msgs::ObstacleArrayStamped>("/obstacles", 100, obstaclesCallback);
   //TODO: occupancy map?
-  region_pub = n.advertise<core_msgs::WorldRegion>("/goal_region", 100);
+  region_pub = n.advertise<core_msgs::WorldRegion>("/gate_region", 100);
 
   ros::spin();
   return 0;
