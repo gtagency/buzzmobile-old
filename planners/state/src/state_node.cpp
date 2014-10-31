@@ -30,7 +30,7 @@ void joystickCallback(const sensor_msgs::Joy::ConstPtr& joystick) {
   switch(state) {
   case MANUAL:
     if (joystick->buttons[PS3_BUTTON_ACTION_TRIANGLE]) {
-      state = AUTO;
+      state = START;
       break;
     }
     break;
