@@ -21,8 +21,8 @@ volatile int count = 0;
 const double ticksPerRev = 3600;
 const double wheelCirc = 2.198;
 
-const int minPotVal = 540;
-const int maxPotVal = 775;
+const int minPotVal = 552;
+const int maxPotVal = 729;
 const int midPotVal = 660;
 const float anglePerPotTick = 0.003697731; // rad
 
@@ -94,7 +94,7 @@ void loop() {
       steerController.setDesiredValue(Serial.parseFloat());
       lastCmdTime = millis();
       retMsg[0] = STX;
-      sprintf(retMsg+1, "%05i", count);
+      sprintf(retMsg+1, "%05i%05.4f", count, getSteeringAngle());
       Serial.println(retMsg);
       count = 0;
     }

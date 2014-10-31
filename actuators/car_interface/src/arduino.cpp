@@ -72,8 +72,10 @@ void Arduino::read_run() {
     if(in == STX) {
       boost::asio::read(port, boost::asio::buffer(buffer, 5));
       int tickCount = atoi(buffer);
-      if(encoder_callback != NULL) {
-        encoder_callback(tickCount);
+      boost::asio::read(port, boost::asio::buffer(buffer, 5));
+      float angle = atof(buffer);
+      if(odometry_callback != NULL) {
+        odometry_callback(tickCount, angle);
       }
     }
     usleep(10000);
@@ -88,8 +90,8 @@ void Arduino::setSpeed(double val) {
   speed = val;
 }
 
-void Arduino::setEncoderCallback(void (*callback)(int)) {
-  encoder_callback = callback;
+void Arduino::setOdometryCallback(void (*callback)(int, float)) {
+  odometry_callback = callback;
 }
 
 string Arduino::padded_itoa(int i, int width) {
