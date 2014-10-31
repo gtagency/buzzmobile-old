@@ -37,7 +37,7 @@ def stateScore(img, state):
     return len(img) - state[1]
 
 def heuristic(img, state):
-    return state[1]
+    return state[1] + state[2] * 100# + abs(state[0] - len(img[0]))
 
 def successors(img, state, carWidth, pixelStep):
     successorDeltas = []
@@ -65,13 +65,26 @@ def successors(img, state, carWidth, pixelStep):
             successors.append((newX, newY, newTheta))
     return successors
 
+
+def isPoint(img, pos, val):
+    """ img is y,x 2D array, pos is x,y point """
+    intX = int(pos[0])
+    intY = int(pos[1])
+    if intX < 0 or intX >= len(img[0]) or intY < 0 or intY >= len(img[1]):
+        return False
+    return img[intY][intX] == val
+
 def checkSurroundings(img, pos, carWidth):
-    if not img[int(pos[1])][int(pos[0])] == 1:
+    on = '\x01'
+    if not isPoint(img, pos, on):
         return False
     r = carWidth/2
     t = 0
     while t < 2 * math.pi:
-        if not img[int(r*math.sin(t)+pos[1])][int(r*math.cos(t)+pos[0])] == 1:
+        checkX = int(r*math.cos(t)+pos[0])
+        checkY = int(r*math.sin(t)+pos[1])
+        
+        if not isPoint(img, (checkX, checkY), on):
             return False
         t += math.pi /4
     return True

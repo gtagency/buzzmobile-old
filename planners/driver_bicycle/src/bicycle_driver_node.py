@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import roslib; roslib.load_manifest("driver_bicycle")
 import rospy
 import bicycle_driver
 from geometry_msgs.msg import Pose2D
@@ -8,7 +9,7 @@ from std_msgs.msg import Bool, Header
 from core_msgs.msg import MotionCommand
 
 class BicycleDriveNode:
-    def __init__(sideWheelSeparation, targetV, toleranceDist, toleranceTheta):
+    def __init__(self, sideWheelSeparation, targetV, toleranceDist, toleranceTheta):
         self.driver = bicycle_driver.BicycleDriver(sideWheelSeparation, targetV,
                                     toleranceDist, toleranceTheta)
         self.traj_pub = rospy.Publisher("motion_command", MotionCommand)
@@ -16,50 +17,45 @@ class BicycleDriveNode:
         rospy.Subscriber("planned_path", Path, self.updatePlan)
         rospy.Subscriber("brake", Bool, self.setStopFlag)
         self.brake_flag = True
+        self.driver.updatePosition(200, 400, 0)
 
     def run(self):
         r = rospy.Rate(25)
         while not rospy.is_shutdown():
             r.sleep()
 
+    def publishMotionCommand(self, speed, angle):
+        header = Header()
+#          header.time = rospy.get_rostime()
+        msg = MotionCommand()
+        msg.header = header
+        msg.speed = speed 
+        msg.angle = angle
+        self.traj_pub.publish(msg)
+
+
     def setStopFlag(self, flag):
         self.brake_flag = flag.data
         if flag.data:
-            header = Header()
-            header.time = rospy.get_rostime()
-            msg = MotionCommand()
-            msg.header = header
-            msg.speed = 0
-            msg.angle = 0
-            traj_pub.publish(msg))
+            self.publishMotionCommand(0, 0)
 
     def updatePlan(self, plan):
         if not self.brake_flag:
-            velocity, angle = self.driver.updatePlan(list(plan.waypoints))
-            header = Header()
-            header.time = rospy.get_rostime()
-            msg = MotionCommand()
-            msg.header = header
-            msg.speed = velocity
-            msg.angle = angle
-            traj_pub.publish(msg))
+            waypoints = [(p.x,p.y,p.theta) for p in plan.poses]
+            velocity, angle = self.driver.updatePlan(waypoints)
+            self.publishMotionCommand(velocity, angle)
 
     def updatePosition(self, pose):
         if self.driver.updatePosition(float(pose.x), float(pose.y), float(pose.theta)):
             if not self.brake_flag:
                 velocity, angle = driver.makeTrajectory()
-                header = Header()
-                header.time = rospy.get_rostime()
-                msg = MotionCommand()
-                msg.header = header
-                msg.speed = velocity
-                msg.angle = angel
-                traj_pub.publish(msg))
+                self.publishMotionCommand(velocity, angle)
 
 
 if __name__ == "__main__":
-    sideWheelSeparation = rospy.get_param('sideWheelSeparation', 0)
-    targetV = rospy.get_param('targetV', 0)
+    rospy.init_node("driver_bicycle")
+    sideWheelSeparation = rospy.get_param('sideWheelSeparation', 1)
+    targetV = rospy.get_param('targetV', 1)
     toleranceDist = rospy.get_param('toleranceDist', 0)
     toleranceTheta = rospy.get_param('toleranceTheta', 0)
 

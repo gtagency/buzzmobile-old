@@ -5,8 +5,9 @@ import planner_astar
 import math
 from geometry_msgs.msg import Pose2D
 from planner_astar.msg import Path
-from lane_classifier.msg import LaneLabels
+#from lane_classifier.msg import LaneLabels
 from std_msgs.msg import Bool
+from core_msgs.msg import WorldRegion
 
 class PlannerNode:
     def __init__(pixelToMeter):
@@ -14,7 +15,8 @@ class PlannerNode:
         self.carWidth = carWidth
         self.path_pub = rospy.Publisher("planned_path", Path)
         rospy.Subscriber("car_position", Pose2D, self.updatePosition)
-        rospy.Subscriber("image_driveable", LaneLabels, self.updatePlan)
+#        rospy.Subscriber("image_driveable", LaneLabels, self.updatePlan)
+        rospy.Subscriber("world_model", WorldRegion, self.updatePlan)
         rospy.Subscriber("running_flag", Bool, self.setDriveFlag)
         self.posX = 0
         self.posY = 0
@@ -33,10 +35,10 @@ class PlannerNode:
             msg.poses = []
             path_pub.publish(msg)
 
-    def updatePlan(self, img):
+    def updatePlan(self, world_model):
         if self.run_flag:
-            img = convertImageToArray(img)
-            path = planner_astar.planPath(img, self.carWidth/self.pixelToMeter)
+            wm_array = convertWorldModelToArray(world_model)
+            path = planner_astar.planPath(wm_array, self.carWidth * world_model.resolution)
             path = convertPathToWorldFrame(path)
             msg = Path()
             msg.poses = path
@@ -47,10 +49,11 @@ class PlannerNode:
         self.posY = pose.y
         self.posTheta = pose.theta
 
-    def convertImageToArray(self, img):
-        height = img.height
-        width = img.width
-        arr = [img.labels[i*width:i*width+width] for i in range(height)]
+    def convertWorldModelToArray(self, world_model):
+        height = world_model.height
+        width = world_model.width
+        arr = [world_model.labels[i*width:i*width+width] for i in range(height)]
+        return arr
 
     def convertPathToWorldFrame(self, path):
         newPath = []
