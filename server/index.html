@@ -1,0 +1,16 @@
+ <html>
+    <head>
+        
+    </head>
+    <body>
+        <img id="image" src="img/plan.jpg">
+
+    </body>
+    <script type="text/javascript">
+    window.setInterval(function() {imgcallback()}, 100);
+    function imgcallback() {
+         document.getElementById('image').src = "img/plan.jpg?t="+new Date().getTime();
+         console.log("doing the thing");
+    }
+    </script>
+ </html>

@@ -30,8 +30,13 @@ bool isYPositive(const core_msgs::Obstacle& ob) {
   return ob.center.y > 0;
 }
 
-int line(const geometry_msgs::Point32& a, const geometry_msgs::Point32& b, int x) {
-  return a.y + (((b.y - a.y)/(double) (b.x - a.x)) * (x - a.x));
+int line(const geometry_msgs::Point32& a, const geometry_msgs::Point32& b, int y) {
+  double div = b.y - a.y;
+  // Handle vertical lines with grace
+  if (div == 0) {
+    div++;
+  }
+  return a.x + (((b.x - a.x)/div) * (y - a.y));
 }
 
 //distance from 0,0 = magnitude of point vector
@@ -57,8 +62,8 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
   msg.resolution = params.pixels_per_meter;
   msg.labels.assign(msg.width * msg.height, 0);
   geometry_msgs::Point32 bottomLeft, bottomRight;
-  bottomRight.y = (params.car_width_meters / 2) * msg.resolution;
-  bottomLeft.y = -(params.car_width_meters / 2) * msg.resolution;
+  bottomRight.y = -(params.car_width_meters / 2) * msg.resolution;
+  bottomLeft.y  = (params.car_width_meters / 2) * msg.resolution;
   bottomLeft.x = bottomRight.x = 0;
 
   post1.center.x *= msg.resolution;
@@ -70,18 +75,18 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
   for (int row = 0; row < msg.height; row++) {
     for (int col = 0; col < msg.width; col++) {
       int position = row * msg.width + col;
-      int x = msg.height - row;
+      int x = msg.height - row - 1;
       // This assumes that y is positive to the right. This is probably wrong.
-      int y = col - (msg.width / 2);
+      int y = (msg.width / 2) - col;
       if (x > MINIMUM_DISTANCE_METERS * msg.resolution) {
-	if (x > line(bottomRight, post2.center, y) && x > line(bottomLeft, post1.center, y)) {
-	  msg.labels[position] = 1;
-	} else {
-	  msg.labels[position] = 0;
-	}
-       } else {
-	  msg.labels[position] = 0;
-       }
+        if (x >= line(bottomRight, post2.center, y) && x >= line(bottomLeft, post1.center, y)) {
+          msg.labels[position] = 1;
+        } else {
+          msg.labels[position] = 0;
+        }
+      } else {
+        msg.labels[position] = 0;
+      }
     }
   }
   region_pub.publish(msg);
@@ -98,7 +103,7 @@ int main(int argv, char **argc) {
   ros::NodeHandle n;
   ros::NodeHandle npriv("~");
 
-  DECLARE_PARAM(car_width, double, 5);
+  DECLARE_PARAM(car_width, double, 1);
   DECLARE_PARAM(output_x_res, double, 400);
   DECLARE_PARAM(output_y_res, double, 400);
   DECLARE_PARAM(pixels_per_meter, double, 23);
@@ -108,9 +113,9 @@ int main(int argv, char **argc) {
   params.output_y_res = output_y_res;
   params.pixels_per_meter = pixels_per_meter;
 
-  ros::Subscriber s = n.subscribe<core_msgs::ObstacleArrayStamped>("/obstacles", 100, obstaclesCallback);
+  ros::Subscriber s = n.subscribe<core_msgs::ObstacleArrayStamped>("obstacles", 100, obstaclesCallback);
   //TODO: occupancy map?
-  region_pub = n.advertise<core_msgs::WorldRegion>("/gate_region", 100);
+  region_pub = n.advertise<core_msgs::WorldRegion>("gate_region", 100);
 
   ros::spin();
   return 0;

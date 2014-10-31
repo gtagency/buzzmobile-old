@@ -24,8 +24,8 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
   core_msgs::WorldRegion msg;
   msg.width = threshImg.cols;
   msg.height = threshImg.rows;
-  msg.resolution = 0; //TODO
-  msg.labels.assign(msg.width * msg.height, 0);
+  msg.resolution = 23; //TODO
+  msg.labels.assign(msg.width * msg.height, 1);
 
   int center = threshImg.cols / 2;
   for (int row = threshImg.rows - 1; row >= 0; --row) {
@@ -33,11 +33,11 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
     while (col >= 0 && threshImg.at<uchar>(row, col) == 0) {
       col--;
     }
-    for (col = col + 1; col < threshImg.cols; ++col) {
+    for (; col >= 0; --col) {
       if (row * msg.width + col >= msg.width * msg.height) {
         std::cout << row * msg.width + col << std::endl;
       }
-      msg.labels[row * msg.width + col] = 1; 
+      msg.labels[row * msg.width + col] = 0; 
     }
   }
 /*
