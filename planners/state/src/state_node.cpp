@@ -11,7 +11,6 @@
 
 enum StateEnum { AUTO = 0, MANUAL = 1, START = 2, BRAKE = 3 };
 
-ros::NodeHandle n;
 ros::Publisher state_publisher;
 
 StateEnum state = MANUAL;
@@ -62,10 +61,13 @@ void joystickCallback(const sensor_msgs::Joy::ConstPtr& joystick) {
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "state");
+  ros::NodeHandle n;
 
   ros::Subscriber joy = n.subscribe<sensor_msgs::Joy>("joy", 1000, joystickCallback);
   ros::Subscriber brake = n.subscribe<std_msgs::Bool>("brake", 1000, brakeCallback);
 
   state_publisher = n.advertise<core_msgs::State>("state", 1000);
 
+  ros::spin();
+  return 0;
 }
