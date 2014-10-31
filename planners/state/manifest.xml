@@ -1,0 +1,17 @@
+<package>
+  <description brief="state">
+
+     state
+
+  </description>
+  <author>viki</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/state</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="core_msgs"/>
+
+</package>
+
+

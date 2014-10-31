@@ -15,7 +15,7 @@ Buzzmobile - The self driving parade float
     - lidar
       - courtesy of [hokuyo_node]
     - encoder(s)
-      - courtesy of Robojackets
+      - courtesy of RoboJackets
       - axle encoders provide PD values
       - steering encoders are just potentiometers
       - we may want to do additional processing, but that can come later
