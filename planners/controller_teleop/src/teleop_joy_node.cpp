@@ -122,7 +122,7 @@ void handleTurn(const sensor_msgs::Joy::ConstPtr& joy) {
   float mag = sqrt(joy->axes[0] * joy->axes[0] + joy->axes[1] * joy->axes[1]);
   //joystick is around the center...send 0 speed
   if (mag > 1e-6) {
-    angle = atan2(fabs(joy->axes[1]), -joy->axes[0]) - M_PI_2;
+    angle = -(atan2(fabs(joy->axes[1]), -joy->axes[0]) - M_PI_2);
     ROS_INFO("angle: [%f]", angle);
   }
   if (lastAngle != angle) {

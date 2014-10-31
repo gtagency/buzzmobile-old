@@ -10,24 +10,29 @@ core_msgs::WorldRegion gateRegion;
 
 void gateRegionCallback(const core_msgs::WorldRegion::ConstPtr& region) {
   gateRegion = *region;
-  updateWorldModel();
+//  updateWorldModel();
 }
 core_msgs::WorldRegion laneRegion;
 
 void laneRegionCallback(const core_msgs::WorldRegion::ConstPtr& region) {
   laneRegion = *region;
-  updateWorldModel();
+  //updateWorldModel();
 }
 
 std::vector<core_msgs::Obstacle> obstacles;
 void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& obsArray) {
   obstacles = obsArray->obstacles;
   std::cout << obstacles.size() << std::endl;
-  updateWorldModel();
+  //updateWorldModel();
 }
 
 double euclideanDistance(int centerX, int centerY, int ptX, int ptY) {
   return sqrt(pow(centerX - ptX, 2) + pow(centerY - ptY, 2));
+}
+
+void updateTimer(const ros::TimerEvent&) {
+  //NOTE: this is safe because the timers are executed as part of the same queue as subscriber callbacks.
+  updateWorldModel();
 }
 
 void updateWorldModel() {
@@ -96,6 +101,7 @@ int main(int argc, char **argv) {
   ros::Subscriber s2 = n.subscribe<core_msgs::WorldRegion>("lane_region", 100, laneRegionCallback);
   ros::Subscriber s3 = n.subscribe<core_msgs::ObstacleArrayStamped>("obstacles", 100, obstaclesCallback);
 
+  ros::Timer t = n.createTimer(ros::Duration(0.1), updateTimer);
   ros::spin();
   return 0;
 }

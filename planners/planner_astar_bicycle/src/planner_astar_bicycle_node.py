@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 
+import roslib; roslib.load_manifest("planner_astar_bicycle")
 import rospy
-import planner_astar
+import path_planner_astar_bicycle
 import math
 from geometry_msgs.msg import Pose2D
 from planner_astar_bicycle.msg import Path
-from lane_classifier.msg import LaneLabels
+#from lane_classifier.msg import LaneLabels
+from core_msgs.msg import WorldRegion
 
 class PlannerNode:
-    def __init__(pixelToFeet, carWidth):
+    def __init__(self, pixelToFeet, carWidth):
+        rospy.init_node("planner_astar_bicycle");
         self.pixelToFeet = pixelToFeet
         self.carWidth = carWidth
         self.path_pub = rospy.Publisher("planned_path", Path)
         rospy.Subscriber("car_position", Pose2D, self.updatePosition)
-        rospy.Subscriber("image_driveable", LaneLabels, self.updatePlan)
+        #rospy.Subscriber("image_driveable", LaneLabels, self.updatePlan)
+        rospy.Subscriber("world_model", WorldRegion, self.updatePlan)
         self.posX = 0
         self.posY = 0
         self.posTheta = 0
@@ -23,10 +27,10 @@ class PlannerNode:
         while not rospy.is_shutdown():
             r.sleep()
 
-    def updatePlan(self, img):
-        img = convertImageToArray(img)
-        path = planner_astar.planPath(img, self.carWidth/self.pixelToFeet, 1/self.pixelToFeet)
-        path = convertPathToWorldFrame(path)
+    def updatePlan(self, world_model):
+        wm_array = self.convertWorldModelToArray(world_model)
+        path = path_planner_astar_bicycle.planPath(wm_array, self.carWidth * world_model.resolution, world_model.resolution)
+        path = self.convertPathToWorldFrame(path)
         msg = Path()
         msg.poses = path
         self.path_pub.publish(msg)
@@ -36,10 +40,13 @@ class PlannerNode:
         self.posY = pose.y
         self.posTheta = pose.theta
 
-    def convertImageToArray(self, img):
-        height = img.height
-        width = img.width
-        arr = [img.labels[i*width:i*width+width] for i in range(height)]
+    def convertWorldModelToArray(self, world_model):
+        height = world_model.height
+        width = world_model.width
+        #NOTE: labels is a character array, with \x01 and \x00 values
+        # OK for now, probably want to fix/change this later
+        arr = [world_model.labels[i*width:i*width+width] for i in range(height)]
+        return arr
 
     def convertPathToWorldFrame(self, path):
         newPath = []
