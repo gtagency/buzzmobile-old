@@ -13,7 +13,7 @@
 #include <core_msgs/Obstacle.h>
 #include <core_msgs/WorldRegion.h>
 
-#define MINIMUM_DISTANCE_METERS 2.5
+#define MINIMUM_DISTANCE_METERS 0.0
 
 ros::Publisher region_pub;
 
@@ -71,7 +71,7 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
     for (int col = 0; col < msg.width; col++) {
       int position = row * msg.width + col;
       int x = msg.height - row;
-      // This assumes that y is positive to the right. Might want to fix in obstacle detector
+      // This assumes that y is positive to the right. This is probably wrong.
       int y = col - (msg.width / 2);
       if (x > MINIMUM_DISTANCE_METERS * msg.resolution) {
 	if (x > line(bottomRight, post2.center, y) && x > line(bottomLeft, post1.center, y)) {
@@ -99,8 +99,8 @@ int main(int argv, char **argc) {
   ros::NodeHandle npriv("~");
 
   DECLARE_PARAM(car_width, double, 5);
-  DECLARE_PARAM(output_x_res, double, 800);
-  DECLARE_PARAM(output_y_res, double, 800);
+  DECLARE_PARAM(output_x_res, double, 400);
+  DECLARE_PARAM(output_y_res, double, 400);
   DECLARE_PARAM(pixels_per_meter, double, 23);
 
   params.car_width_meters = car_width;
