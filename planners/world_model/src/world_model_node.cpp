@@ -52,7 +52,7 @@ void updateWorldModel() {
        it != obstacles.end();
       it++) {
     int centerX = (it->center.x * xres);
-    int centerY = (it->center.y * yres);
+    int centerY = -(it->center.y * yres);
     int radius = it->radius * xres;
 
     //std::cout << centerX << ", " << centerY << ", " << radius << std::endl;
@@ -80,8 +80,6 @@ void updateWorldModel() {
 	//&& laneRegion.labels[inx] == 1
         && obsregion.labels[inx] == 1) {
       merged.labels[inx] = 1;
-    } else {
-      merged.labels[inx] = 0;
     }
   }
 
