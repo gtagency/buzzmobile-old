@@ -11,18 +11,36 @@
 
 enum StateEnum { AUTO = 0, MANUAL = 1, START = 2, BRAKE = 3 };
 
-ros::Publisher state_publisher;
+ros::Publisher state_pub;
+ros::Publisher honk_long_pub;
+ros::Publisher honk_short_pub;
 
 StateEnum state = MANUAL;
-bool braked = false;
 
-void brakeCallback(const std_msgs::Bool::ConstPtr& brake) {
-  if (brake->data) {
-    state = BRAKE;
-  }
+void publishState() {
   core_msgs::State msg;
   msg.state = state;
-  state_publisher.publish(msg);
+  state_pub.publish(msg);
+}
+
+void publishHornLong() {
+  std_msgs::Bool msg;
+  msg.data = true;
+  honk_long_pub.publish(msg);
+}
+
+void publishHornShort() {
+  std_msgs::Bool msg;
+  msg.data = true;
+  honk_short_pub.publish(msg);
+}
+
+void brakeCallback(const std_msgs::Bool::ConstPtr& brake) {
+  if (brake->data && state == AUTO) {
+    state = BRAKE;
+    publishState();
+    publishHornLong();
+  }
 }
 
 void joystickCallback(const sensor_msgs::Joy::ConstPtr& joystick) {
@@ -38,6 +56,7 @@ void joystickCallback(const sensor_msgs::Joy::ConstPtr& joystick) {
       state = MANUAL;
       break;
     } else if (joystick->buttons[PS3_BUTTON_START]) {
+      publishHornShort();
       state = AUTO;
       break;
     }
@@ -54,9 +73,7 @@ void joystickCallback(const sensor_msgs::Joy::ConstPtr& joystick) {
     }
   }
 
-    core_msgs::State msg;
-    msg.state = state;
-    state_publisher.publish(msg);
+  publishState();
 }
 
 int main(int argc, char** argv) {
@@ -66,8 +83,11 @@ int main(int argc, char** argv) {
   ros::Subscriber joy = n.subscribe<sensor_msgs::Joy>("joy", 1000, joystickCallback);
   ros::Subscriber brake = n.subscribe<std_msgs::Bool>("brake", 1000, brakeCallback);
 
-  state_publisher = n.advertise<core_msgs::State>("state", 1000);
+  honk_long_pub = n.advertise<std_msgs::Bool>("honk_long", 1);
+  honk_short_pub = n.advertise<std_msgs::Bool>("honk_short", 1);
+  state_pub = n.advertise<core_msgs::State>("state", 1000, true);
 
+  publishState();
   ros::spin();
   return 0;
 }
