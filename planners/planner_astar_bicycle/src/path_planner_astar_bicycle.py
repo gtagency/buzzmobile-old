@@ -11,7 +11,9 @@ def planPath(img, carWidthPixel, pixelStep):
     best = (start, stateScore(img, start))
     visited = set([])
 
-    while pq:
+    depth = 50
+    while pq and depth >= 0:
+        depth -= 1
         priority, cost, state, parent = heapq.heappop(pq)
         if state not in visited:
             visited.add(state)
