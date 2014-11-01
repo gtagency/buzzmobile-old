@@ -15,7 +15,7 @@
 
 #define MINIMUM_DISTANCE_METERS 0.0
 
-ros::Publisher region_pub;
+ros::Publisher full_region_pub, left_turn_pub, right_turn_pub;
 
 struct Params {
   double output_x_res;
@@ -56,40 +56,62 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
   std::vector<core_msgs::Obstacle>::iterator bound = std::partition(obstacles.begin(), obstacles.end(), isYPositive);
   core_msgs::Obstacle post1 = *std::max_element(obstacles.begin(), bound, obsDistanceCompare);
   core_msgs::Obstacle post2 = *std::max_element(bound, obstacles.end(), obsDistanceCompare);
-  core_msgs::WorldRegion msg;
-  msg.width = params.output_x_res;
-  msg.height = params.output_y_res;
-  msg.resolution = params.pixels_per_meter;
-  msg.labels.assign(msg.width * msg.height, 0);
+  core_msgs::WorldRegion full, leftTurn, rightTurn;
+  full.width = leftTurn.width = rightTurn.width =  params.output_x_res;
+  full.height = leftTurn.height = rightTurn.height = params.output_y_res;
+  full.resolution = leftTurn.resolution = rightTurn.resolution = params.pixels_per_meter;
+
+  full.labels.assign(full.width * full.height, 0);
+  leftTurn.labels.assign(leftTurn.width * leftTurn.height, 0);
+  rightTurn.labels.assign(rightTurn.width * rightTurn.height, 0);
+
   geometry_msgs::Point32 bottomLeft, bottomRight;
-  bottomRight.y = -(params.car_width_meters / 2) * msg.resolution;
-  bottomLeft.y  = (params.car_width_meters / 2) * msg.resolution;
+  bottomRight.y = -(params.car_width_meters / 2) * full.resolution;
+  bottomLeft.y  = (params.car_width_meters / 2) * full.resolution;
   bottomLeft.x = bottomRight.x = 0;
 
-  post1.center.x *= msg.resolution;
-  post1.center.y *= msg.resolution;
+  post1.center.x *= full.resolution;
+  post1.center.y *= full.resolution;
 
-  post2.center.x *= msg.resolution;
-  post2.center.y *= msg.resolution;
+  post2.center.x *= full.resolution;
+  post2.center.y *= full.resolution;
 
-  for (int row = 0; row < msg.height; row++) {
-    for (int col = 0; col < msg.width; col++) {
-      int position = row * msg.width + col;
-      int x = msg.height - row - 1;
-      // This assumes that y is positive to the right. This is probably wrong.
-      int y = (msg.width / 2) - col;
-      if (x > MINIMUM_DISTANCE_METERS * msg.resolution) {
+  for (int row = 0; row < full.height; row++) {
+    for (int col = 0; col < full.width; col++) {
+      int position = row * full.width + col;
+      int x = full.height - row - 1;
+      int y = (full.width / 2) - col;
+      if (x > MINIMUM_DISTANCE_METERS * full.resolution) {
+
         if (x >= line(bottomRight, post2.center, y) && x >= line(bottomLeft, post1.center, y)) {
-          msg.labels[position] = 1;
+          full.labels[position] = 1;
         } else {
-          msg.labels[position] = 0;
+          full.labels[position] = 0;
         }
+
+	if (x >= line(bottomRight, post2.center, y) && x <= line(bottomRight, post2.center, y) + ((full.height >> 1) - bottomRight.y) + (params.car_width_meters * full.resolution)) {
+	  rightTurn.labels[position] = 1;
+	} else {
+	  rightTurn.labels[position] = 0;
+	}
+
+	if (x >= line(bottomLeft, post1.center, y) && x <= line(bottomLeft, post1.center, y) + ((full.height >> 1) - bottomLeft.y) + (params.car_width_meters * full.resolution)) {
+	  leftTurn.labels[position] = 1;
+	} else {
+	  leftTurn.labels[position] = 0;
+	}
+
       } else {
-        msg.labels[position] = 0;
+        full.labels[position] = 0;
+	leftTurn.labels[position] = 0;
+	rightTurn.labels[position] = 0;
       }
     }
   }
-  region_pub.publish(msg);
+
+  full_region_pub.publish(full);
+  right_turn_pub.publish(rightTurn);
+  left_turn_pub.publish(leftTurn);
 }
 
 #define DECLARE_PARAM(name, type, defVal)\
@@ -115,7 +137,9 @@ int main(int argv, char **argc) {
 
   ros::Subscriber s = n.subscribe<core_msgs::ObstacleArrayStamped>("obstacles", 100, obstaclesCallback);
   //TODO: occupancy map?
-  region_pub = n.advertise<core_msgs::WorldRegion>("gate_region", 100);
+  full_region_pub = n.advertise<core_msgs::WorldRegion>("gate_region", 100);
+  left_turn_pub = n.advertise<core_msgs::WorldRegion>("turn/left", 100);
+  right_turn_pub = n.advertise<core_msgs::WorldRegion>("turn/right", 100);
 
   ros::spin();
   return 0;

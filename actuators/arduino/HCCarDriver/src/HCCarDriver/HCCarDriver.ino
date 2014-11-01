@@ -5,12 +5,15 @@
 
 #define STX ((char)2)
 
-const int motor_pin = 3;
-const int steer_pin = 5;
-const int enc_a     = 2;
-const int enc_b     = 4;
-const int pot_pin   = A0;
-const int led_pin   = 13;
+const int enc_a      = 2;
+const int motor_pin  = 3;
+const int enc_b      = 4;
+const int steer_pin  = 5;
+const int estop_pin  = 6;
+const int horn_pin   = 7;
+const int yellow_led = 8;
+const int red_led    = 13;
+const int pot_pin    = A0;
 
 Servo motor;
 Servo steer;
@@ -58,6 +61,7 @@ void stopAll() {
   steerController.setDesiredValue(getSteeringAngle());
   steerController.setOutput(90);
   steer.write(90);
+  digitalWrite(horn_pin, LOW);
 }
 
 void setup() {
@@ -67,7 +71,10 @@ void setup() {
   pinMode(steer_pin, OUTPUT);
   pinMode(enc_a, INPUT);
   pinMode(enc_b, INPUT);
-  pinMode(led_pin, OUTPUT);
+  pinMode(red_led, OUTPUT);
+  pinMode(yellow_led, OUTPUT);
+  pinMode(horn_pin, OUTPUT);
+  pinMode(estop_pin, INPUT);
   
   lastTime = millis();
   
@@ -83,15 +90,20 @@ void setup() {
   speedController.setDesiredValue(0);
   steerController.setDesiredValue(0);
   
-  digitalWrite(led_pin, LOW);
+  digitalWrite(red_led, LOW);
+  digitalWrite(yellow_led, LOW);
+  digitalWrite(horn_pin, LOW);
 }
 
 void loop() {
+  digitalWrite(yellow_led, digitalRead(estop_pin));
+  
   char retMsg[6] = {0};
   while(Serial.available()) {
     if(Serial.read() == STX) {
       speedController.setDesiredValue(Serial.parseFloat());
       steerController.setDesiredValue(Serial.parseFloat());
+      digitalWrite(horn_pin, Serial.parseInt());
       lastCmdTime = millis();
       retMsg[0] = STX;
       sprintf(retMsg+1, "%05i%05.4f", count, getSteeringAngle());
@@ -100,28 +112,36 @@ void loop() {
     }
   }
   
-  speedController.update(getSpeed());
-  motor.write(speedController.getOutput());
-  
-  
-  steerController.update(getSteeringAngle());
-  // Soft limits on steering to avoid damage.
-  if(analogRead(pot_pin) >= maxPotVal && steerController.getOutput() < 90)
-    steer.write(90);
-  else if(analogRead(pot_pin) <= minPotVal && steerController.getOutput() > 90)
-    steer.write(90);
-  else
-    steer.write(steerController.getOutput());
+  /* Only run the controllers if the motors are enabled.
+   * This prevents the controllers ramping up while the
+   * vehicle is estopped, creating a dangerous situation.
+   */
+  if(digitalRead(estop_pin) == HIGH) {
+    speedController.update(getSpeed());
+    motor.write(speedController.getOutput());
     
-  
-  if(millis() - lastCmdTime > 500) {
-    digitalWrite(led_pin, HIGH);
-    stopAll();
+    
+    steerController.update(getSteeringAngle());
+    // Soft limits on steering to avoid damage.
+    if(analogRead(pot_pin) >= maxPotVal && steerController.getOutput() < 90)
+      steer.write(90);
+    else if(analogRead(pot_pin) <= minPotVal && steerController.getOutput() > 90)
+      steer.write(90);
+    else
+      steer.write(steerController.getOutput());
+      
+    
+    if(millis() - lastCmdTime > 500) {
+      digitalWrite(red_led, HIGH);
+      stopAll();
+    } else {
+      digitalWrite(red_led, LOW);
+    }
   } else {
-    digitalWrite(led_pin, LOW);
+    // If estop is triggered, go ahead and reset the controllers.
+    stopAll();
   }
   
-    
   delay(50);
 }
 
