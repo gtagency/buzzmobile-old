@@ -12,11 +12,11 @@ from core_msgs.msg import ObstacleArrayStamped, Obstacle
 
 import detector_functions as df
 
-df.GROUPING_DISTANCE = .1
-df.MIN_GROUP_SIZE = 5
+df.GROUPING_DISTANCE = .07
+df.MIN_GROUP_SIZE = 2
 #Do NOT use values with magnitude greater than pi/2.
-df.START_ANGLE = -pi/2
-df.END_ANGLE = pi/2
+df.START_ANGLE = -pi/2 + 3 * pi/180
+df.END_ANGLE = pi/2 - 3 * pi/180
 RANGE_STEP = 2 
 # Obstacle distance threshold.
 MIN_DISTANCE = 0.8
