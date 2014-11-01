@@ -18,6 +18,8 @@ public:
   void setSteering(double angle);
 
   void setSpeed(double speed);
+  
+  void setHorn(bool on);
 
   void setOdometryCallback(void (*callback)(int, float));
 
@@ -41,6 +43,7 @@ private:
 
   float speed; // m/s
   float steer; // rad
+  bool  horn;
 
   bool threads_running;
 };

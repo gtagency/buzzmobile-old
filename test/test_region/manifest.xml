@@ -1,0 +1,17 @@
+<package>
+  <description brief="test_region">
+
+     test_region
+
+  </description>
+  <author>Jesse Rosalia</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/test_region</url>
+  <depend package="roscpp"/>
+  <depend package="core_msgs"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+
