@@ -92,7 +92,7 @@ void Arduino::setSpeed(double val) {
 }
 
 void Arduino::setHorn(bool on) {
-  horn = on;
+  horn = on ? 1 :0;
 }
 
 void Arduino::setOdometryCallback(void (*callback)(int, float)) {

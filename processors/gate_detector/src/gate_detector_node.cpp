@@ -71,8 +71,11 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
     skipEveryOther = false;
     return;
   }*/
-  skipEveryOther = true;
+  //skipEveryOther = true;
   std::vector<core_msgs::Obstacle>::iterator bound = std::partition(obstacles.begin(), obstacles.end(), isYPositive);
+  if (obstacles.begin() == bound || obstacles.end() == bound) {
+    return;
+  }
   core_msgs::Obstacle post1 = *std::max_element(obstacles.begin(), bound, obsDistanceCompare);
   core_msgs::Obstacle post2 = *std::max_element(bound, obstacles.end(), obsDistanceCompare);
   core_msgs::WorldRegion full, leftTurn, rightTurn;

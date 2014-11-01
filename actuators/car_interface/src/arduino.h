@@ -43,7 +43,7 @@ private:
 
   float speed; // m/s
   float steer; // rad
-  bool  horn;
+  unsigned int  horn;
 
   bool threads_running;
 };

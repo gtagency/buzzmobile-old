@@ -36,9 +36,12 @@ void obstacleInDistanceCallback(const core_msgs::ObstacleArrayStamped::ConstPtr&
   }
   std::vector<core_msgs::Obstacle> inWidth;
   for (unsigned int i = 0; i < obstacles.size(); i++) {
-    if (fabs(obstacles[i].center.y) < CAR_WIDTH_METERS) {
+    if (fabs(obstacles[i].center.y) < CAR_WIDTH_METERS / 2) {
       inWidth.push_back(obstacles[i]);
     }
+  }
+  if (inWidth.size() == 0) {
+    return;
   }
   core_msgs::Obstacle closest = *std::max_element(inWidth.begin(), inWidth.end(), isCloser);
   std_msgs::Bool msg;

@@ -17,7 +17,7 @@ void honkLongHandler(const std_msgs::Bool::ConstPtr&) {
 void honkShortHandler(const std_msgs::Bool::ConstPtr&) {
 //  std::cout << "In honkShort" << std::endl;
   car_horn_pub.publish(on);
-  ros::Duration(0.125).sleep(); // sleep for half a second
+  ros::Duration(0.2).sleep(); // sleep for half a second
   car_horn_pub.publish(off);
 //  std::cout << "Exiting honkShort" << std::endl;
 }
