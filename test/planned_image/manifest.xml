@@ -1,0 +1,19 @@
+<package>
+  <description brief="planned_image">
+
+     planned_image
+
+  </description>
+  <author>Jesse Rosalia</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/planned_image</url>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="opencv2"/>
+  <depend package="image_lib"/>
+  <depend package="planner_astar_bicycle"/>
+
+</package>
+
+
