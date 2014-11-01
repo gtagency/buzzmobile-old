@@ -34,7 +34,11 @@ int line(const geometry_msgs::Point32& a, const geometry_msgs::Point32& b, int y
   double div = b.y - a.y;
   // Handle vertical lines with grace
   if (div == 0) {
-    div++;
+    if (b.y < 0) {
+      div--;
+    } else {
+      div++;
+    }
   }
   return a.x + (((b.x - a.x)/div) * (y - a.y));
 }
@@ -48,11 +52,26 @@ bool obsDistanceCompare(const core_msgs::Obstacle& ob1, const core_msgs::Obstacl
   return euclideanDistance(ob1.center) < euclideanDistance(ob2.center);
 }
 
+//bool skipEveryOther = false;
 void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
-  std::vector<core_msgs::Obstacle> obstacles(inmsg->obstacles);
+  std::vector<core_msgs::Obstacle> obstacles;
+  obstacles.reserve(inmsg->obstacles.size());
+  for (std::vector<core_msgs::Obstacle>::const_iterator it = inmsg->obstacles.begin();
+       it != inmsg->obstacles.end();
+       it++) {
+    if (fabs(it->center.y) > params.car_width_meters / 2) {
+      obstacles.push_back(*it);
+    }
+  } 
   if(obstacles.size() == 0) {
     return;
   }
+  /*
+  if (skipEveryOther) {
+    skipEveryOther = false;
+    return;
+  }*/
+  skipEveryOther = true;
   std::vector<core_msgs::Obstacle>::iterator bound = std::partition(obstacles.begin(), obstacles.end(), isYPositive);
   core_msgs::Obstacle post1 = *std::max_element(obstacles.begin(), bound, obsDistanceCompare);
   core_msgs::Obstacle post2 = *std::max_element(bound, obstacles.end(), obsDistanceCompare);
@@ -72,9 +91,16 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
 
   post1.center.x *= full.resolution;
   post1.center.y *= full.resolution;
+  if (post1.center.y < bottomLeft.y) {
+    post1.center.y = bottomLeft.y;
+  }
 
   post2.center.x *= full.resolution;
   post2.center.y *= full.resolution;
+  if (post2.center.y > bottomRight.y) {
+    post2.center.y = bottomRight.y;
+  }
+  std::cout << bottomLeft.y << "," << bottomRight.y << "," << post1.center.x << "," << post1.center.y << "," << post2.center.x << "," << post2.center.y << "," << line(bottomLeft, post1.center, 20) << "," << line(bottomRight, post2.center, -20)  << std::endl;
 
   for (int row = 0; row < full.height; row++) {
     for (int col = 0; col < full.width; col++) {
@@ -125,7 +151,7 @@ int main(int argv, char **argc) {
   ros::NodeHandle n;
   ros::NodeHandle npriv("~");
 
-  DECLARE_PARAM(car_width, double, 1);
+  DECLARE_PARAM(car_width, double, 1.5);
   DECLARE_PARAM(output_x_res, double, 400);
   DECLARE_PARAM(output_y_res, double, 400);
   DECLARE_PARAM(pixels_per_meter, double, 23);

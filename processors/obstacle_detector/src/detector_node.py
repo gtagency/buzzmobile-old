@@ -15,11 +15,11 @@ import detector_functions as df
 df.GROUPING_DISTANCE = .07
 df.MIN_GROUP_SIZE = 2
 #Do NOT use values with magnitude greater than pi/2.
-df.START_ANGLE = -pi/2 + 3 * pi/180
-df.END_ANGLE = pi/2 - 3 * pi/180
+df.START_ANGLE = -pi/3# + 10 * pi/180
+df.END_ANGLE = pi/3# - 10 * pi/180
 RANGE_STEP = 2 
 # Obstacle distance threshold.
-MIN_DISTANCE = 0.8
+MIN_DISTANCE = 1.5 #0.8
 
 
 class Detector(object):
