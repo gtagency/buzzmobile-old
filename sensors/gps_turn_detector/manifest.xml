@@ -1,0 +1,18 @@
+<package>
+  <description brief="gps_turn_detector">
+
+     gps_turn_detector
+
+  </description>
+  <author>George P Burdell</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/gps_turn_detector</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="core_msgs"/>
+  <depend package="sensor_msgs"/>
+
+</package>
+
+
