@@ -66,6 +66,7 @@ void stateCallback(const core_msgs::State::ConstPtr& stateMsg) {
 void joyCallback(const sensor_msgs::Joy::ConstPtr& joy) {
 
   if (state == core_msgs::State::MANUAL) { //manual 
+    handleHorn(joy);
     handleDrive(joy);
     handleTurn(joy);
   }
@@ -134,9 +135,9 @@ void handleTurn(const sensor_msgs::Joy::ConstPtr& joy) {
 }
 
 void handleHorn(const sensor_msgs::Joy::ConstPtr& joy) {
-    if (joy->horn_button) {
-        honkHorn();
-    }	
+  std_msgs::Bool msg;
+  msg.data = joy->horn_button;
+  horn_pub.publish(msg);
 }
 
 void honkHorn() {
@@ -161,7 +162,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle n;
  
   motion_pub = n.advertise<core_msgs::MotionCommand>("motion_command", 100);
-//  horn_pub   = n.advertise<sound_play::SoundRequest>("robotsound", 100);
+  horn_pub   = n.advertise<std_msgs::Bool>("car_horn", 1);
 //  brake_pub  = n.advertise<std_msgs::Bool>("brake", 100, true);
 
 
