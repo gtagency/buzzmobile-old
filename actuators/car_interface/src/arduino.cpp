@@ -9,7 +9,8 @@ Arduino::Arduino()
     : port(ioservice),
       device_path(""),
       speed(0),
-      steer(0)
+      steer(0),
+      horn(false)
 {
 }
 
@@ -54,7 +55,7 @@ void Arduino::write_run() {
   while(threads_running) {
     stringstream command;
     ROS_INFO("%f, %f", speed, steer);
-    command << STX << speed << ',' << steer << '\n';
+    command << STX << speed << ',' << steer << ',' << horn <<'\n';
     try {
       boost::asio::write(port, boost::asio::buffer(command.str().c_str(), command.str().length()));
     } catch(...) {
@@ -88,6 +89,10 @@ void Arduino::setSteering(double val) {
 
 void Arduino::setSpeed(double val) {
   speed = val;
+}
+
+void Arduino::setHorn(bool on) {
+  horn = on;
 }
 
 void Arduino::setOdometryCallback(void (*callback)(int, float)) {

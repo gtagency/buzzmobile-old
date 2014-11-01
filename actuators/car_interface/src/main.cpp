@@ -2,6 +2,7 @@
 #include "arduino.h"
 #include <core_msgs/Odom.h>
 #include <core_msgs/MotionCommand.h>
+#include <std_msgs/Bool.h>
 
 using namespace std;
 
@@ -10,6 +11,7 @@ const double wheelCirc = 2.198;
 
 ros::Publisher encoder_pub;
 ros::Subscriber command_sub;
+ros::Subscriber horn_sub;
 
 Arduino arduino;
 
@@ -22,6 +24,8 @@ ros::Duration keep_alive_frequency(1.0);
 void odometry_callback(int, float);
 
 void command_callback(core_msgs::MotionCommand::ConstPtr);
+
+void horn_callback(std_msgs::Bool::ConstPtr);
 
 void keep_alive_callback(const ros::TimerEvent&);
 
@@ -38,7 +42,9 @@ int main(int argc, char **argv) {
 
   encoder_pub = node_handle.advertise<core_msgs::Odom>("encoder_odom", 1000);
 
-  command_sub = node_handle.subscribe("motion_command", 1000, command_callback);
+  command_sub = node_handle.subscribe("motion_command", 1, command_callback);
+  
+  horn_sub = node_handle.subscribe("car_horn", 1, horn_callback);
 
   ros::Timer keepAliveTimer = node_handle.createTimer(keep_alive_frequency, keep_alive_callback);
   ros::spin();
@@ -67,4 +73,9 @@ void command_callback(core_msgs::MotionCommand::ConstPtr cmd) {
   arduino.setSpeed(cmd->speed);
   arduino.setSteering(cmd->angle);
   last_command_time = cmd->header.stamp;
+}
+
+void horn_callback(std_msgs::Bool::ConstPtr msg) {
+  ROS_INFO("Turning %s horn.", (msg->data ? "on" : "off"));
+  arduino.setHorn(msg->data);
 }
