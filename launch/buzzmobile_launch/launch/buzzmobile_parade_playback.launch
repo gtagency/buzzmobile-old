@@ -1,0 +1,29 @@
+<launch>
+
+  <arg name="record_data" default="false" />
+  <arg name="ns" value="buzzmobile"/>
+  <group ns="$(arg ns)">
+    <!-- Sensors provided by bag file -->
+    <!-- Actuation N/A for playback (or provided by bag file)-->
+    <!-- Processing -->
+    <node pkg="projection" name="frontCam_proj" type="projection_node">
+        <param name="ground_z_dim" value="3.5365"/>
+    </node>
+    <node pkg="obstacle_detector" name="obstacle_detector" type="detector_node.py"/>
+    <node pkg="gate_detector" name="gate_detector" type="gate_detector_node"/>
+    <node pkg="yellow_line_detector" name="yellow_line_detector" type="yellow_line_detector_node"/>
+    <node pkg="state" name="state_node" type="state_node" />
+    <!-- xres = 22.9, yres = 20.9 -->
+    <node pkg="world_model" name="world_model" type="world_model_node"/>
+    <node pkg="planner_astar_bicycle" type="planner_astar_bicycle_node.py" name="planner" />
+    <node pkg="driver_bicycle" type="bicycle_driver_node.py" name="driver" />
+    <node pkg="gate_detector" name="world_region_image_node" type="world_region_image_node">
+        <remap from="region" to="world_model" />
+        <remap from="image" to="world_model_image" />
+    </node>
+    <node pkg="planned_image" type="planned_image_node" name="planned_image">
+        <remap from="image" to="world_model_image" />
+    </node>
+
+  </group>
+</launch>

@@ -1,0 +1,1 @@
+KERNEL=="ttyACM?", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", ATTRS{serial}=="95237323834351F0B2B1",SYMLINK+="arduino_motor_controller"

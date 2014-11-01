@@ -10,20 +10,20 @@ core_msgs::WorldRegion gateRegion;
 
 void gateRegionCallback(const core_msgs::WorldRegion::ConstPtr& region) {
   gateRegion = *region;
-//  updateWorldModel();
 }
+
 core_msgs::WorldRegion laneRegion;
+ros::Time lastReceivedLane;
 
 void laneRegionCallback(const core_msgs::WorldRegion::ConstPtr& region) {
   laneRegion = *region;
-  //updateWorldModel();
+  lastReceivedLane = ros::Time::now();
 }
 
 std::vector<core_msgs::Obstacle> obstacles;
 void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& obsArray) {
   obstacles = obsArray->obstacles;
   std::cout << obstacles.size() << std::endl;
-  //updateWorldModel();
 }
 
 double euclideanDistance(int centerX, int centerY, int ptX, int ptY) {
@@ -82,7 +82,7 @@ void updateWorldModel() {
   merged.labels.assign(merged.height * merged.width, 0);
   for (unsigned int inx = 0; inx < merged.width * merged.height; inx++) {
     if (gateRegion.labels[inx] == 1 
-	//&& laneRegion.labels[inx] == 1
+        && ((ros::Time::now() - lastReceivedLane) > ros::Duration(1.0) || laneRegion.labels[inx] == 1) //only consider lanes if received in the last second 
         && obsregion.labels[inx] == 1) {
       merged.labels[inx] = 1;
     }
