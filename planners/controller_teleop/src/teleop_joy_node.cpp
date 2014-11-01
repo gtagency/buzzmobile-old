@@ -3,6 +3,7 @@
 #include <std_msgs/Bool.h>
 #include <sensor_msgs/Joy.h>
 #include <core_msgs/MotionCommand.h>
+#include <core_msgs/State.h>
 //#include "controller_teleop/LinearCommand.h"
 //#include <corobot_msgs/takepic.h>
 //#include <corobot_msgs/PanTilt.h>
@@ -29,6 +30,7 @@ bool obstacleFlag = false;
 float lastSpeed = 0;
 float lastAngle = 0;
 
+unsigned int state;
 bool manualToggle = true; //start up with manual toggle = true
 bool brakePushed  = false;
 //int pan_value,tilt_value;
@@ -52,20 +54,21 @@ void sendBrakeCommand();
 
 void keepAliveCallback(const ros::TimerEvent&) {
   // To keep alive, just resend the motion command
-  sendMotionCommand();
+  if (state == core_msgs::State::MANUAL) { //manual 
+    sendMotionCommand();
+  }
+}
+
+void stateCallback(const core_msgs::State::ConstPtr& stateMsg) {
+  state = stateMsg->state;
 }
 
 void joyCallback(const sensor_msgs::Joy::ConstPtr& joy) {
 
-	handleBrake(joy);
-	handleHorn(joy);
-	
-//	if (obstacleFlag) {
-//		return;
-//	}
-    
-  handleDrive(joy);
-  handleTurn(joy);
+  if (state == core_msgs::State::MANUAL) { //manual 
+    handleDrive(joy);
+    handleTurn(joy);
+  }
 }
 
 void sendMotionCommand() {
@@ -85,7 +88,6 @@ void handleDrive(const sensor_msgs::Joy::ConstPtr& joy) {
   //********************************************
   //Motor control
   float speed = 0.0;
-  int secondsDuration = 0;
   //if the stop button isnt held, we want to go
   //otherwise, just keep sending the stop command
   float correction = -1.0; //required because the range of a button axis is 0 to -1.0 (all pushed in)
@@ -98,7 +100,7 @@ void handleDrive(const sensor_msgs::Joy::ConstPtr& joy) {
 }
 
 void handleBrake(const sensor_msgs::Joy::ConstPtr& joy) {
-  bool pub = false;
+  //bool pub = false;
   if (joy->brake_button) {
     // When we first press the button, toggle the flag and publish
     if (!brakePushed) {
@@ -145,7 +147,7 @@ void honkHorn() {
     horn_pub.publish(msg);
 }
 
-int obstacleCallback(const std_msgs::Bool::ConstPtr& flag) {
+void obstacleCallback(const std_msgs::Bool::ConstPtr& flag) {
 	if (!obstacleFlag && flag->data) {
 		honkHorn();
 	} //TODO: for some reason this will honk repeatedly (repeated obstacles)...may need to debug this
@@ -159,17 +161,18 @@ int main(int argc, char** argv) {
   ros::NodeHandle n;
  
   motion_pub = n.advertise<core_msgs::MotionCommand>("motion_command", 100);
-  horn_pub   = n.advertise<sound_play::SoundRequest>("robotsound", 100);
-  brake_pub  = n.advertise<std_msgs::Bool>("brake", 100, true);
+//  horn_pub   = n.advertise<sound_play::SoundRequest>("robotsound", 100);
+//  brake_pub  = n.advertise<std_msgs::Bool>("brake", 100, true);
 
 
   // Initialize the latched topic
-  sendBrakeCommand(); 
   ros::Subscriber sub = n.subscribe<sensor_msgs::Joy>("joy", 1000, joyCallback);
-  ros::Subscriber sub2 = n.subscribe<std_msgs::Bool>("obstacle_flag", 1000, obstacleCallback);
-  ros::Rate r(pubFreq);
+  ros::Subscriber sub2 = n.subscribe<core_msgs::State>("state", 1000, stateCallback);
+  //ros::Subscriber sub2 = n.subscribe<std_msgs::Bool>("obstacle_flag", 1000, obstacleCallback);
+//  ros::Rate r(pubFreq);
 
   ros::Timer keepAliveTimer = n.createTimer(ros::Duration(1.0/pubFreq), keepAliveCallback);
   ros::spin();
 
+  return 0;
 }

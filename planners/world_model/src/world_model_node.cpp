@@ -6,6 +6,7 @@ ros::Publisher worldModel_pub;
 
 void updateWorldModel();
 
+//TODO: number of regions should be configurable by ros param, e.g. _regions:=/lane_region /gate_region /test_region
 core_msgs::WorldRegion gateRegion;
 
 void gateRegionCallback(const core_msgs::WorldRegion::ConstPtr& region) {
@@ -18,6 +19,14 @@ ros::Time lastReceivedLane;
 void laneRegionCallback(const core_msgs::WorldRegion::ConstPtr& region) {
   laneRegion = *region;
   lastReceivedLane = ros::Time::now();
+}
+
+// A misc region that can be used to shape the drivable area
+core_msgs::WorldRegion otherRegion;
+ros::Time lastReceivedOther;
+void otherRegionCallback(const core_msgs::WorldRegion::ConstPtr& region) {
+  otherRegion = *region;
+  lastReceivedOther = ros::Time::now();
 }
 
 std::vector<core_msgs::Obstacle> obstacles;
@@ -83,6 +92,7 @@ void updateWorldModel() {
   for (unsigned int inx = 0; inx < merged.width * merged.height; inx++) {
     if (gateRegion.labels[inx] == 1 
         && ((ros::Time::now() - lastReceivedLane) > ros::Duration(1.0) || laneRegion.labels[inx] == 1) //only consider lanes if received in the last second 
+        && ((ros::Time::now() - lastReceivedOther) > ros::Duration(1.0) || otherRegion.labels[inx] == 1) //only consider other region if received in the last second 
         && obsregion.labels[inx] == 1) {
       merged.labels[inx] = 1;
     }
@@ -99,7 +109,8 @@ int main(int argc, char **argv) {
 
   ros::Subscriber s  = n.subscribe<core_msgs::WorldRegion>("gate_region", 100, gateRegionCallback);
   ros::Subscriber s2 = n.subscribe<core_msgs::WorldRegion>("lane_region", 100, laneRegionCallback);
-  ros::Subscriber s3 = n.subscribe<core_msgs::ObstacleArrayStamped>("obstacles", 100, obstaclesCallback);
+  ros::Subscriber s3 = n.subscribe<core_msgs::WorldRegion>("other_region", 100, otherRegionCallback);
+  ros::Subscriber s4 = n.subscribe<core_msgs::ObstacleArrayStamped>("obstacles", 100, obstaclesCallback);
 
   ros::Timer t = n.createTimer(ros::Duration(0.1), updateTimer);
   ros::spin();

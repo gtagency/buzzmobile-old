@@ -6,7 +6,7 @@ import bicycle_driver
 from geometry_msgs.msg import Pose2D
 from planner_astar_bicycle.msg import Path
 from std_msgs.msg import Bool, Header
-from core_msgs.msg import MotionCommand
+from core_msgs.msg import MotionCommand, State
 
 class BicycleDriveNode:
     def __init__(self, sideWheelSeparation, targetV, toleranceDist, toleranceTheta):
@@ -15,7 +15,7 @@ class BicycleDriveNode:
         self.traj_pub = rospy.Publisher("motion_command", MotionCommand)
         rospy.Subscriber("car_position", Pose2D, self.updatePosition)
         rospy.Subscriber("planned_path", Path, self.updatePlan)
-        rospy.Subscriber("brake", Bool, self.setStopFlag)
+        rospy.Subscriber("state", State, self.setState)
         self.brake_flag = True
         self.driver.updatePosition(200, 400, 0)
 
@@ -34,10 +34,8 @@ class BicycleDriveNode:
         self.traj_pub.publish(msg)
 
 
-    def setStopFlag(self, flag):
-        self.brake_flag = flag.data
-        if flag.data:
-            self.publishMotionCommand(0, 0)
+    def setState(self, msg):
+        self.brake_flag = msg.state != msg.AUTO
 
     def updatePlan(self, plan):
         if not self.brake_flag:

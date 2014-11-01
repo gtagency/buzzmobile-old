@@ -76,6 +76,7 @@ void carPosAndVelCallback(const core_msgs::Pose2DAndVelStamped::ConstPtr& msg) {
 */
 int main(int argc, char **argv) {
 
+  ros::init(argc, argv, "brake");
   ros::NodeHandle n;
 
   ros::Subscriber s = n.subscribe<core_msgs::ObstacleArrayStamped>("obstacles", 100, obstacleInDistanceCallback);
