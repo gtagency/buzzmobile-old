@@ -118,13 +118,16 @@ void obstaclesCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& inmsg) {
           full.labels[position] = 0;
         }
 
-	if (x >= line(bottomRight, post2.center, y) && x <= line(bottomRight, post2.center, y) + ((full.height >> 1) - bottomRight.y) + (params.car_width_meters * full.resolution)) {
+  // Publish "turn lane" regions...these regions will force the planner to turn along the region's trajectory
+  int turnLaneWidth = (3 * params.car_width_meters * full.resolution);
+	//if (x >= line(bottomRight, post2.center, y) && x <= line(bottomRight, post2.center, y) + ((full.height >> 1) - bottomRight.y) + (params.car_width_meters * full.resolution)) {
+	if (x >= line(bottomRight, post2.center, y) && x <= line(bottomRight, post2.center, y) + turnLaneWidth) {
 	  rightTurn.labels[position] = 1;
 	} else {
 	  rightTurn.labels[position] = 0;
 	}
 
-	if (x >= line(bottomLeft, post1.center, y) && x <= line(bottomLeft, post1.center, y) + ((full.height >> 1) - bottomLeft.y) + (params.car_width_meters * full.resolution)) {
+	if (x >= line(bottomLeft, post1.center, y) && x <= line(bottomLeft, post1.center, y) + turnLaneWidth) { 
 	  leftTurn.labels[position] = 1;
 	} else {
 	  leftTurn.labels[position] = 0;
