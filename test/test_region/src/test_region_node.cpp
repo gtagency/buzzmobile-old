@@ -48,7 +48,7 @@ core_msgs::WorldRegion getDiagonalRightRegion() {
   msg.resolution = 23;
   msg.labels.assign(msg.width * msg.height, 0);
   for (unsigned int row = 0; row < msg.height; ++row) {
-    unsigned int start = msg.width - row/2;
+    unsigned int start = msg.width - 2*row/3;
     unsigned int end = std::min(msg.width - 1, msg.width - row/2 + 100);
 
     for (unsigned int col = start; col < end; ++col) {
