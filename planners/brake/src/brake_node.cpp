@@ -10,6 +10,8 @@
 
 #include "bicycle_model/bicycle_model_calculations.h"
 
+#define CAR_WIDTH 1; //edit this
+
 ros::Publisher brake_pub;
 
 core_msgs::Pose2DAndVelStamped currentPoseAndVel;
@@ -23,9 +25,30 @@ geometry_msgs::Point32 computeCurrentCarPoint() {
   return pt;
 }
 
-bool hitTest(const geometry_msgs::Polygon& poly, const geometry_msgs::Point32& pt) {
-  return false; //TODO
+bool isCloser(const core_msgs::Obstacle& obj1, const core_msgs::Obstacle& obj2) {
+  return obj1.center.y < obj2.center.y;
+
 }
+
+void obstacleInDistanceCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& msg) {
+  std::vector<core_messages::Obstacle> obstacles(msg->obstacles);
+  if (obstacles.size() == 0) {
+    return false;
+  }
+  std::vector<core_messages::Obstacle> inWidth;
+  for (int i = 0; i , obstacles.size(); i++) {
+    if (obstacles[i].center.y > CAR_WIDTH || obstacles[i].center.y < (-1 * CAR_WIDTH)) {
+      inWidth.push_back(obstacles[i];
+    }
+  }
+  core_msgs::Obstacle closest = *std::max_element(inWidth.begin(), inWidth.end(), isCloser);
+  std_msgs::Bool msg;
+  if (closest.center.x < 2) {
+    msg.data = true;
+    brake_pub.publish(msg);
+  }
+}
+
 void obstacleCallback(const core_msgs::ObstacleArrayStamped::ConstPtr& msg) {
   geometry_msgs::Point32 testPt = computeCurrentCarPoint();  
   /*
@@ -56,7 +79,7 @@ int main(int argc, char **argv) {
 
   ros::NodeHandle n;
 
-  ros::Subscriber s = n.subscribe<core_msgs::ObstacleArrayStamped>("obstacles", 100, obstacleCallback);
+  ros::Subscriber s = n.subscribe<core_msgs::ObstacleArrayStamped>("obstacles", 100, obstacleInDistanceCallback);
   ros::Subscriber s2 = n.subscribe<core_msgs::Pose2DAndVelStamped>("car_pos_and_vel", 100, carPosAndVelCallback);
   brake_pub = n.advertise<std_msgs::Bool>("brake", 1000, true);
 
