@@ -10,7 +10,7 @@
 
 //#include "bicycle_model/bicycle_model_calculations.h"
 
-#define CAR_WIDTH_METERS (1) //edit this
+#define CAR_WIDTH_METERS (1.5) //edit this
 #define MIN_DIST_METERS (2)
 ros::Publisher brake_pub;
 /*
@@ -42,7 +42,7 @@ void obstacleInDistanceCallback(const core_msgs::ObstacleArrayStamped::ConstPtr&
   }
   core_msgs::Obstacle closest = *std::max_element(inWidth.begin(), inWidth.end(), isCloser);
   std_msgs::Bool msg;
-  if (closest.center.x > CAR_WIDTH/METERS/2 && closest.center.x < MIN_DIST_METERS) {
+  if (closest.center.x > CAR_WIDTH_METERS/2 && closest.center.x < MIN_DIST_METERS) {
     msg.data = true;
     brake_pub.publish(msg);
   }
