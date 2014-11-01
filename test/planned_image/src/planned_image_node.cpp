@@ -26,7 +26,7 @@ void imageCallback(const sensor_msgs::Image::ConstPtr& imageMsg) {
     cv::circle(src, cv::Point(it->x, it->y), 5, cv::Scalar(255, 0, 0), -1);
   }
 
-  cv::imwrite("path.jpg", src);
+  cv::imwrite("plan.jpg", src);
   std_msgs::Header header;
   cv_bridge::CvImage outImage(header, image_lib::getRosType(src.type()), src);
 
