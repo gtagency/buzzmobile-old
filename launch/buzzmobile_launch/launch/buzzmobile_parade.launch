@@ -1,33 +1,55 @@
 <launch>
 
-  <arg name="record_data" default="false" />
+  <arg name="record_data" default="true" />
   <arg name="ns" value="buzzmobile"/>
   <group ns="$(arg ns)">
+    <!-- Sensors -->
 	<node pkg="hokuyo_node" name="hokuyo_node" type="hokuyo_node">
-        <param name="port" value="/dev/ttyACM0" /> <!-- TODO replace with hokuyo port from udev -->
+        <param name="port" value="/dev/sensors/hokuyo_H1008911" />
     </node>
 	<node pkg="usb_cam" name="front_cam" type="usb_cam_node">
 		<param name="video_device" value="/dev/video0"/>
+        <param name="framerate" value="10" />
+        <param name="pixel_format" value="yuyv" />
+        <remap from="front_cam/image_raw" to="image_raw" />
 	</node> 
+    <!-- Actuation -->
     <node pkg="car_interface" name="car_interface" type="car_interface"/>
     <node pkg="joy" name="joy_node" type="joy_node">
         <param name="dev" value="/dev/input/js0" />
     </node>
     <node pkg="controller_teleop" name="teleop_joy" type="teleop_joy_node" />
-
+    <node pkg="horn" name="horn_node" type="horn_node"/>
+    <!-- Processing -->
     <node pkg="projection" name="frontCam_proj" type="projection_node">
         <param name="ground_z_dim" value="3.5365"/>
-    </node>
-  <node pkg="obstacle_detector" name="obstacle_detector" type="detector_node.py"/>
+        <param name="output_x_res" value="400"/>
+        <param name="output_y_res" value="400"/>
 
-  <include file="lane_classifier_pipeline.launch"/>
-  <include file="visualization.launch" ns="viz">
-    <arg name="ns" value="$(arg ns)"/>
-  </include>
+    </node>
+    <node pkg="obstacle_detector" name="obstacle_detector" type="detector_node.py"/>
+    <node pkg="gate_detector" name="gate_detector" type="gate_detector_node"/>
+    <node pkg="yellow_line_detector" name="yellow_line_detector" type="yellow_line_detector_node"/>
+    <!-- World Model, State, Planners -->
+    <node pkg="state" name="state_node" type="state_node" />
+    <!-- xres = 22.9, yres = 20.9 -->
+    <node pkg="world_model" name="world_model" type="world_model_node">
+        <remap from="other_region" to="test_region" />
+    </node>
+    <node pkg="brake" name="brake" type="brake_node"/>
+    <node pkg="planner_astar_bicycle" type="planner_astar_bicycle_node.py" name="planner" />
+    <node pkg="driver_bicycle" type="bicycle_driver_node.py" name="driver" />
+    <node pkg="gate_detector" name="world_region_image_node" type="world_region_image_node">
+        <remap from="region" to="world_model" />
+        <remap from="image" to="world_model_image" />
+    </node>
+    <node pkg="planned_image" type="planned_image_node" name="planned_image">
+        <remap from="image" to="world_model_image" />
+    </node>
 
   </group>
   <node pkg="rosbag" type="record" name="rosbag_record_cam"
-     args="/buzzmobile/image_raw /buzzmobile/camera_info /buzzmobile/scan /buzzmobile/teleop_joy /buzzmobile/odom /buzzmobile/lane_labels"
+     args="/buzzmobile/image_raw /buzzmobile/camera_info /buzzmobile/scan /buzzmobile/teleop_joy /buzzmobile/odom"
      if="$(arg record_data)" />
 
 </launch>
