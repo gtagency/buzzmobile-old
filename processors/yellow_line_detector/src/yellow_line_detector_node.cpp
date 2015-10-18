@@ -7,8 +7,36 @@
 ros::Publisher region_pub;
 ros::Publisher img_pub;
 
+
 #define YELLOW_LOW  cv::Scalar(0,150,150)
 #define YELLOW_HIGH cv::Scalar(120,255,255)
+cv::Mat extractLine(cv::Mat& img) {
+    cv::Mat threshImg;
+    cv::inRange(img, YELLOW_LOW, YELLOW_HIGH, threshImg);
+    return threshImg;
+}
+
+std::Vector<cv::Point> defineLine(cv::Mat& thresholded) {
+    cv::Vector<cv::Point> pts;
+    int center = thresholded.cols / 2;
+    for (int row = 0; row < thresholded.rows; ++row) {
+        for (int col = center; col >= 0; --col) {
+            if (thresholded.at<uchar>(row, col) == 255) {
+                pts.push_back(cv::Point(col, row));
+                break;
+            }
+        }
+    }
+    cv::Vec4f line;
+    cv::fitLine(pts, line, CV_DIST_L2, 0, .01, .01);
+    double slope = line.val[1] / line.val[0];
+    
+}
+
+
+
+
+
 void imageCallback(const sensor_msgs::Image::ConstPtr& image) {
 
   cv_bridge::CvImageConstPtr cv_ptr;
